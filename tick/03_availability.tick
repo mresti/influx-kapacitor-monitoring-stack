@@ -1,0 +1,23 @@
+// MEJORA #1/#7: alerta de disponibilidad. Usa el campo "up" (1/0) que genera
+// el processors.starlark de Telegraf sobre http_response. Incluye deadman para
+// detectar que dejan de llegar sondas (pipeline caído).
+dbrp "telegraf"."autogen"
+
+var data = stream
+    |from()
+        .measurement('http_response')
+        .groupBy('server', 'instance')
+
+data
+    |alert()
+        .id('availability/{{ index .Tags "instance" }}')
+        .message('{{ index .Tags "instance" }} {{ if eq .Level "OK" }}RECUPERADO{{ else }}CAIDO{{ end }}')
+        .crit(lambda: "up" < 1.0)
+        .stateChangesOnly()
+        .log('/var/log/kapacitor/availability.log')
+
+data
+    |deadman(0.0, 2m)
+        .id('availability-deadman/{{ index .Tags "instance" }}')
+        .message('Sin sondas de {{ index .Tags "instance" }} en 2m (pipeline o telegraf caido)')
+        .stateChangesOnly()

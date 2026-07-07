@@ -1,0 +1,21 @@
+// MEJORA #4/#7: alerta de cardinalidad (series) frente al límite por base de datos.
+// Ajusta max_series al valor de max-series-per-database de influxdb.conf.
+dbrp "telegraf"."autogen"
+
+var max_series = 1000000.0
+var warn_pct = 70.0
+var crit_pct = 90.0
+
+stream
+    |from()
+        .measurement('influxdb_database')
+        .groupBy('host', 'database')
+    |eval(lambda: float("numSeries") / max_series * 100.0)
+        .as('series_pct')
+    |alert()
+        .id('influx-cardinality/{{ index .Tags "database" }}')
+        .message('Cardinalidad {{ .Level }} en "{{ index .Tags "database" }}": {{ index .Fields "series_pct" | printf "%.1f" }}% del limite')
+        .warn(lambda: "series_pct" > warn_pct)
+        .crit(lambda: "series_pct" > crit_pct)
+        .stateChangesOnly()
+        .log('/var/log/kapacitor/cardinality.log')

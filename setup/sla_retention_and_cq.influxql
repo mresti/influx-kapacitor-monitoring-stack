@@ -1,0 +1,45 @@
+-- =============================================================================
+-- MEJORA #3 y #4: Retention Policy dedicada + Continuous Queries para SLA y
+-- capacidad. Ejecutar una vez con:
+--   influx -database telegraf -import -path sla_retention_and_cq.influxql -precision ns
+-- o pegando línea a línea en el CLI:  influx
+-- =============================================================================
+
+-- RP de larga duración para datos pre-agregados (informes mensuales/anuales)
+CREATE RETENTION POLICY "sla_long" ON "telegraf" DURATION 400d REPLICATION 1;
+
+-- (Opcional) acotar los datos crudos para controlar disco. Ajusta a tu gusto:
+-- ALTER RETENTION POLICY "autogen" ON "telegraf" DURATION 30d REPLICATION 1 DEFAULT;
+
+-- -----------------------------------------------------------------------------
+-- MEJORA #3: disponibilidad horaria a partir del campo "up" (1/0) que genera
+-- el processors.starlark de Telegraf sobre http_response.
+-- -----------------------------------------------------------------------------
+CREATE CONTINUOUS QUERY "cq_sla_hourly" ON "telegraf"
+BEGIN
+  SELECT mean("up") * 100 AS "availability"
+  INTO "telegraf"."sla_long"."sla_hourly"
+  FROM "telegraf"."autogen"."http_response"
+  GROUP BY time(1h), "server", "instance"
+END;
+
+-- Disponibilidad diaria (para rangos de meses sin escanear millones de puntos)
+CREATE CONTINUOUS QUERY "cq_sla_daily" ON "telegraf"
+BEGIN
+  SELECT mean("availability") AS "availability"
+  INTO "telegraf"."sla_long"."sla_daily"
+  FROM "telegraf"."sla_long"."sla_hourly"
+  GROUP BY time(1d), "server", "instance"
+END;
+
+-- -----------------------------------------------------------------------------
+-- MEJORA #4: histórico de cardinalidad por base de datos para tendencia de
+-- capacidad a largo plazo.
+-- -----------------------------------------------------------------------------
+CREATE CONTINUOUS QUERY "cq_cardinality_hourly" ON "telegraf"
+BEGIN
+  SELECT max("numSeries") AS "numSeries", max("numMeasurements") AS "numMeasurements"
+  INTO "telegraf"."sla_long"."cardinality_hourly"
+  FROM "telegraf"."autogen"."influxdb_database"
+  GROUP BY time(1h), "database", "host"
+END;

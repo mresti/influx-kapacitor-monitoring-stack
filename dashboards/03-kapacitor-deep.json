@@ -1,0 +1,1385 @@
+{
+  "meta": {
+    "chronografVersion": "1.10.2",
+    "sources": {}
+  },
+  "dashboard": {
+    "id": "3",
+    "cells": [
+      {
+        "i": "ba8dd91e-30a3-49b8-a2ef-0c8eaf921b51",
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 3,
+        "name": "Tareas habilitadas / totales",
+        "queries": [
+          {
+            "query": "SELECT last(\"num_enabled_tasks\") AS \"num_enabled_tasks\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT last(\"num_enabled_tasks\") AS \"num_enabled_tasks\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "single-stat",
+        "colors": [
+          {
+            "id": "base",
+            "type": "text",
+            "hex": "#00C9FF",
+            "name": "laser",
+            "value": "-1000000000000000000"
+          }
+        ],
+        "legend": {},
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": true,
+          "digits": 0
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "cc5ffe73-0366-47dd-b1a2-133335a1ec7b",
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 3,
+        "name": "Suscripciones",
+        "queries": [
+          {
+            "query": "SELECT last(\"num_subscriptions\") AS \"num_subscriptions\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT last(\"num_subscriptions\") AS \"num_subscriptions\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "single-stat",
+        "colors": [
+          {
+            "id": "base",
+            "type": "text",
+            "hex": "#00C9FF",
+            "name": "laser",
+            "value": "-1000000000000000000"
+          }
+        ],
+        "legend": {},
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": true,
+          "digits": 0
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "5b5bf81e-2a3b-49dd-b5ec-4f4645919a29",
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 3,
+        "name": "Goroutines",
+        "queries": [
+          {
+            "query": "SELECT last(\"num_goroutine\") AS \"num_goroutine\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT last(\"num_goroutine\") AS \"num_goroutine\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "single-stat",
+        "colors": [
+          {
+            "id": "base",
+            "type": "text",
+            "hex": "#00C9FF",
+            "name": "laser",
+            "value": "-1000000000000000000"
+          }
+        ],
+        "legend": {},
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": true,
+          "digits": 0
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "f6d0acb9-59dd-4208-8f97-4e680e389376",
+        "x": 0,
+        "y": 3,
+        "w": 6,
+        "h": 4,
+        "name": "Edges - recolectados/s vs emitidos/s",
+        "queries": [
+          {
+            "query": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT non_negative_derivative(max(\"emitted\"), 1s) AS \"emitted/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"emitted\"), 1s) AS \"emitted/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "msg/s",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "de975ff2-bcfc-41df-9701-916068d82375",
+        "x": 6,
+        "y": 3,
+        "w": 6,
+        "h": 4,
+        "name": "Ingress - puntos recibidos/s por task",
+        "queries": [
+          {
+            "query": "SELECT non_negative_derivative(max(\"points_received\"), 1s) AS \"points_received/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_ingress\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"points_received\"), 1s) AS \"points_received/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_ingress\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "points/s",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "04c56fe3-eebd-45bd-ab61-517471efec64",
+        "x": 0,
+        "y": 7,
+        "w": 6,
+        "h": 4,
+        "name": "Nodos - errores/s y write_errors/s",
+        "queries": [
+          {
+            "query": "SELECT non_negative_derivative(max(\"errors\"), 1s) AS \"errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\", \"node\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"errors\"), 1s) AS \"errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\", \"node\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT non_negative_derivative(max(\"write_errors\"), 1s) AS \"write_errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"write_errors\"), 1s) AS \"write_errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "err/s",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "21eea810-d452-4d64-bfa0-a80e2d2596fc",
+        "x": 6,
+        "y": 7,
+        "w": 6,
+        "h": 4,
+        "name": "Nodos - tiempo medio de ejecución (ms)",
+        "queries": [
+          {
+            "query": "SELECT mean(\"avg_exec_time_ns\")/1e6 AS \"ms\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT mean(\"avg_exec_time_ns\")/1e6 AS \"ms\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": " ms",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "dc2c1119-a111-4481-86bc-4471d72207c1",
+        "x": 0,
+        "y": 11,
+        "w": 6,
+        "h": 4,
+        "name": "Alertas/s por nivel",
+        "queries": [
+          {
+            "query": "SELECT non_negative_derivative(max(\"crits_triggered\"), 1s) AS \"crits_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"crits_triggered\"), 1s) AS \"crits_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT non_negative_derivative(max(\"warns_triggered\"), 1s) AS \"warns_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"warns_triggered\"), 1s) AS \"warns_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT non_negative_derivative(max(\"infos_triggered\"), 1s) AS \"infos_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"infos_triggered\"), 1s) AS \"infos_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT non_negative_derivative(max(\"oks_triggered\"), 1s) AS \"oks_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"oks_triggered\"), 1s) AS \"oks_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "alerts/s",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "5e888187-a9fb-42f6-a622-9913562ccccf",
+        "x": 6,
+        "y": 11,
+        "w": 6,
+        "h": 4,
+        "name": "Cardinalidad de trabajo por task (working_cardinality)",
+        "queries": [
+          {
+            "query": "SELECT max(\"working_cardinality\") AS \"working_cardinality\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT max(\"working_cardinality\") AS \"working_cardinality\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "series",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "4544f431-72a2-4721-8e61-0a0510689606",
+        "x": 0,
+        "y": 15,
+        "w": 6,
+        "h": 4,
+        "name": "Heap en uso (bytes)",
+        "queries": [
+          {
+            "query": "SELECT mean(\"heap_in_use_bytes\") AS \"heap_in_use_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT mean(\"heap_in_use_bytes\") AS \"heap_in_use_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT mean(\"alloc_bytes\") AS \"alloc_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT mean(\"alloc_bytes\") AS \"alloc_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "bytes",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      },
+      {
+        "i": "6e01f23d-ce1c-429f-98b9-ff3ba8cc5678",
+        "x": 6,
+        "y": 15,
+        "w": 6,
+        "h": 4,
+        "name": "Puntos escritos a InfluxDB/s (nodes)",
+        "queries": [
+          {
+            "query": "SELECT non_negative_derivative(max(\"points_written\"), 1s) AS \"points_written/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"points_written\"), 1s) AS \"points_written/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "points/s",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "",
+        "noteVisibility": "default"
+      }
+    ],
+    "templates": [
+      {
+        "tempVar": ":url:",
+        "id": "6b642b95-39d7-4729-8df4-b7e138bce4b3",
+        "type": "tagValues",
+        "label": "",
+        "values": [],
+        "query": {
+          "influxql": "SHOW TAG VALUES ON \"telegraf\" FROM \"kapacitor\" WITH KEY = \"url\"",
+          "db": "telegraf",
+          "rp": "",
+          "measurement": "kapacitor",
+          "tagKey": "url",
+          "fieldKey": ""
+        }
+      }
+    ],
+    "name": "03 - Kapacitor Deep"
+  }
+}

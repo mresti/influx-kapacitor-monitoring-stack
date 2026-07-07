@@ -1,0 +1,26 @@
+// MEJORA #2/#7: alerta por tasa de errores de escritura en InfluxDB.
+// Se carga automáticamente desde /etc/kapacitor/load (load.dir).
+dbrp "telegraf"."autogen"
+
+var warn_rate = 0.1   // errores/s
+var crit_rate = 1.0   // errores/s
+
+stream
+    |from()
+        .measurement('influxdb_write')
+        .groupBy('host')
+    |derivative('writeError')
+        .unit(1s)
+        .nonNegative()
+    |window()
+        .period(1m)
+        .every(1m)
+    |mean('writeError')
+        .as('err_rate')
+    |alert()
+        .id('influx-ingest-errors/{{ index .Tags "host" }}')
+        .message('InfluxDB ingest {{ .Level }}: {{ index .Fields "err_rate" | printf "%.2f" }} err/s en {{ index .Tags "host" }}')
+        .warn(lambda: "err_rate" > warn_rate)
+        .crit(lambda: "err_rate" > crit_rate)
+        .stateChangesOnly()
+        .log('/var/log/kapacitor/ingest_errors.log')

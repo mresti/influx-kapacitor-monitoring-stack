@@ -1,0 +1,22 @@
+// MEJORA #7: alerta por errores en nodos de Kapacitor.
+dbrp "telegraf"."autogen"
+
+stream
+    |from()
+        .measurement('kapacitor_nodes')
+        .groupBy('host', 'task')
+    |derivative('errors')
+        .unit(1s)
+        .nonNegative()
+    |window()
+        .period(2m)
+        .every(1m)
+    |mean('errors')
+        .as('err_rate')
+    |alert()
+        .id('kapacitor-node-errors/{{ index .Tags "task" }}')
+        .message('Kapacitor task "{{ index .Tags "task" }}" {{ .Level }}: {{ index .Fields "err_rate" | printf "%.2f" }} err/s')
+        .warn(lambda: "err_rate" > 0.0)
+        .crit(lambda: "err_rate" > 1.0)
+        .stateChangesOnly()
+        .log('/var/log/kapacitor/node_errors.log')
