@@ -2,8 +2,9 @@
 
 Configuraciones (`.conf`), dashboards de Chronograf (`.json`), Continuous
 Queries y TICKscripts de alerta para observar salud, SLA y capacidad de InfluxDB
-y Kapacitor con las métricas de **Telegraf**. **Incluye las 8 mejoras
-propuestas** (ver sección final).
+y Kapacitor con las métricas de **Telegraf**. **Incluye las 8 mejoras + 6
+propuestas adicionales** (ver secciones finales) y una topología real de
+2 InfluxDB + 5 Kapacitor.
 
 ## Estructura
 
@@ -15,19 +16,71 @@ influx-obs/
 │   └── telegraf.conf        # inputs TICK + host + prometheus + starlark "up"
 ├── setup/
 │   └── sla_retention_and_cq.influxql   # RP sla_long + Continuous Queries (#3,#4)
-├── tick/                    # alertas como código (#2,#4,#7)
+├── tick/                    # alertas como código (#2,#4,#7 + 6 propuestas)
 │   ├── 00_ingest_errors.tick
 │   ├── 01_cardinality.tick
 │   ├── 02_kapacitor_node_errors.tick
-│   └── 03_availability.tick
+│   ├── 03_availability.tick
+│   ├── 04_telegraf_pipeline.tick     # buffer/metrics_dropped de Telegraf
+│   └── handlers/                     # handlers del topic 'infra' (como código)
+│       ├── log.yaml                  # activo (log a fichero)
+│       ├── slack.yaml.example
+│       └── smtp.yaml.example
 ├── dashboards/              # importar en Chronograf
 │   ├── 01-health.json
 │   ├── 02-influx-deep.json
 │   ├── 03-kapacitor-deep.json
 │   ├── 04-sla-stats.json
 │   └── 05-capacity-stats.json
-└── gen_dashboards.py        # regenera los .json
+├── docker-compose.yml       # stack completo (topología real) para pruebas
+└── docker/                  # variantes/servicios de aprovisionamiento (compose)
+    ├── telegraf.conf        # variante compose (urls a los servicios)
+    ├── setup-influx.sh      # crea DB + RP + CQs + retención
+    └── provision-chronograf.py  # crea source + importa/actualiza dashboards
 ```
+
+## Topología (instancias independientes)
+
+Caso de uso real: **el Kapacitor de alertas cuelga del InfluxDB de
+monitorización**, no del de datos.
+
+```
+                 ┌──────────────┐   suscripción   ┌───────────────┐
+   DB "telegraf" │ influxdb-01  │ ───────────────►│ kapacitor-01  │  ALERTAS
+   (monitoriz.)  │ (monitoriz.) │                 │ (TICKscripts, │  topic 'infra'
+        ▲        └──────────────┘                 │  handlers)    │  → log/slack/smtp
+        │ escribe                                  └───────────────┘
+   ┌──────────┐         observa las 7 instancias
+   │ Telegraf │◄────/debug/vars, /metrics, /ping de influxdb-01/02 y kapacitor-01..05
+   └──────────┘
+        │ observa
+        ▼
+   ┌──────────────┐   suscripción   ┌───────────────────────────┐
+   │ influxdb-02  │ ───────────────►│ kapacitor-02..05 (datos)  │
+   │ (datos)      │                 └───────────────────────────┘
+   └──────────────┘
+                              Chronograf lee de influxdb-01 (dashboards)
+```
+
+### Selectores de instancia (`:instance:`)
+
+Todos los dashboards se filtran por la variable de plantilla `:instance:`
+(`AND "instance" =~ /^:instance:$/`), pero de dos formas:
+
+- **InfluxDB Deep / Kapacitor Deep (02, 03):** variable **tagValues** (dinámica):
+  `SHOW TAG VALUES ... WITH KEY = "instance"`. Descubre las instancias solas
+  según lo que hay en la DB (no hay que mantener listas).
+- **Health / SLA / Capacity (01, 04, 05):** variable **csv** (Chronograf no ofrece
+  opción "All" en tagValues). El primer valor es `.*` y va **seleccionado por
+  defecto**: al interpolarse da `/^.*$/`, que matchea todas las instancias
+  (visibilidad global). El resto de valores (`influxdb-01/02`, `kapacitor-01..05`)
+  permiten fijar una sola instancia. **Para añadir una instancia nueva**: edita la
+  variable (Chronograf → el lápiz de `:instance:`) y añade su valor a la lista csv;
+  `.*` seguirá mostrándolas todas.
+
+Los paneles de measurements sin tag `instance` (host: `cpu`, `mem`, `disk`,
+`diskio`, `system`, `internal_*`; y `procstat`) no se filtran por `:instance:`:
+agrupan por `host` y muestran todo (visibilidad global).
 
 ## Arquitectura de datos
 
@@ -37,36 +90,93 @@ InfluxDB  ──/debug/vars──┐
 Kapacitor /…/debug/vars──┼──► Telegraf ──► InfluxDB (DB "telegraf") ──► Chronograf
 /ping  +  /…/ping  ──────┤        │  (processors.starlark añade up=1/0)
 host cpu/mem/disk/proc───┘        └──► Continuous Queries ──► RP sla_long
-                                          Kapacitor (TICKscripts) ──► alertas
+                                          Kapacitor (TICKscripts) ──► topic 'infra'
+                                                                    └► handlers (log/slack)
 ```
 
 ## Puesta en marcha
 
 1. Copia los `.conf` a `/etc/influxdb`, `/etc/kapacitor`, `/etc/telegraf` y
-   ajusta URLs/credenciales. Para varias instancias, añade todas las URLs en
-   `[[inputs.influxdb]]` y `[[inputs.kapacitor]]` (el tag `url` las distingue).
+   ajusta URLs/credenciales. El tag `instance` (añadido en `[inputs.influxdb.tags]`
+   y `[inputs.kapacitor.tags]`) distingue cada instancia en los dashboards. Para
+   varias instancias **duplica el bloque input** por instancia, cada uno con su
+   url y su tag `instance` (un solo bloque con varias urls compartiría el tag).
 2. Reinicia `influxd`, `kapacitord`, `telegraf`.
 3. Crea RP y Continuous Queries (una vez):
    `influx -database telegraf -import -path setup/sla_retention_and_cq.influxql -precision ns`
-4. Despliega las alertas: copia `tick/*.tick` a `/etc/kapacitor/load/` (el
-   `[load]` de `kapacitor.conf`) y reinicia Kapacitor, o cárgalas con
-   `kapacitor define ... -tick ...`. Comprueba con `kapacitor list tasks`.
+4. Despliega las alertas: copia `tick/*.tick` a `/etc/kapacitor/load/tasks/` (el
+   `[load]` de `kapacitor.conf` escanea el subdirectorio `tasks/`) y reinicia
+   Kapacitor, o cárgalas con `kapacitor define ... -tick ...`. Comprueba con
+   `kapacitor list tasks`.
 5. En Chronograf: **Dashboards → Import Dashboard** y sube cada `.json`.
+
+## Prueba local con Docker Compose
+
+Stack completo con la **topología real** (2 InfluxDB + 5 Kapacitor +
+Telegraf 1.39.1 + Chronograf 1.10.9) para validar conf, dashboards, CQs y
+alertas sin instalar nada. Son **9 contenedores** + 2 one-shots:
+
+```bash
+docker compose up -d      # ~90 s hasta que todo esté healthy
+```
+
+URLs (puertos publicados en el host):
+
+- InfluxDB monitorización (influxdb-01): http://localhost:8086
+- InfluxDB datos (influxdb-02):          http://localhost:8087
+- Kapacitor alertas (kapacitor-01):      http://localhost:9092
+- Kapacitor datos (kapacitor-02..05):    http://localhost:9093..9096
+- Chronograf:                            http://localhost:8888
+
+Se aprovisiona solo (servicios one-shot, ambos contra influxdb-01):
+
+- **influx-setup** — crea la DB `telegraf`, la RP `sla_long`, las Continuous
+  Queries y la retención (`monitor` de `_internal` a 7d) de
+  `setup/sla_retention_and_cq.influxql`.
+- **chronograf-provision** — crea el source e **importa/actualiza** los 5
+  dashboards (idempotente-actualizante: en un segundo `up` hace PUT, no duplica).
+
+Detalles:
+
+- Telegraf usa `docker/telegraf.conf` (variante con urls a los servicios de la
+  red de compose); el canónico es `conf/telegraf.conf`. Pin `telegraf:1.39.1`
+  (última 1.39.x).
+- **Solo `kapacitor-01`** (alertas) monta `./tick` en `/etc/kapacitor/load/tasks/`
+  y `./tick/handlers` en `/etc/kapacitor/load/handlers/` (el `[load]` escanea esos
+  subdirectorios). `kapacitor-02..05` arrancan con `KAPACITOR_LOAD_ENABLED=false`.
+- **Limitaciones conocidas en local:** (1) sin `inputs.procstat`
+  (`influxd`/`kapacitord` en contenedores aparte) → paneles de **uptime de
+  proceso, RSS y FDs** vacíos; (2) `inputs.tail` de queries lentas no activo
+  (influxd loguea a stdout) → panel **"Queries lentas/min"** vacío. Ambos
+  funcionan en un despliegue real donde Telegraf corre junto a los procesos/logs.
+
+```bash
+docker compose down -v    # parar y borrar volúmenes
+```
 
 ## Los 5 dashboards
 
 | # | Fichero | Qué responde |
 |---|---------|--------------|
 | 1 | `01-health.json` | Disponibilidad, **uptime de proceso y host**, latencia `/ping`, errores de ingesta, queries, errores en nodos de Kapacitor, throughput. |
-| 2 | `02-influx-deep.json` | Memoria/GC, HTTP, write/query engine, TSM/WAL, **percentiles de latencia y de pausa GC**. Filtro por instancia (`:url:`). |
-| 3 | `03-kapacitor-deep.json` | Tareas, edges, ingress, nodos, alertas por nivel, cardinalidad, memoria. Filtro por instancia (`:url:`). |
+| 2 | `02-influx-deep.json` | Memoria/GC, HTTP, write/query engine, TSM/WAL, **percentiles de latencia y de pausa GC**. Filtro por instancia (`:instance:`). |
+| 3 | `03-kapacitor-deep.json` | Tareas, edges, ingress, nodos, alertas por nivel, cardinalidad, memoria. Filtro por instancia (`:instance:`). |
 | 4 | `04-sla-stats.json` | SLA (%) por servicio/instancia, error budget, **SLI de ingesta**, **histórico diario desde CQ**. |
 | 5 | `05-capacity-stats.json` | Cardinalidad por DB, **gauge de uso vs límite de series**, disco, RAM/CPU/FDs, buffer de Telegraf. |
 
 ## Notas de métricas
 
-- `influxdb_memstats` usa campos en mayúsculas (`Alloc`, `HeapInuse`);
-  `kapacitor_memstats` usa snake_case (`heap_in_use_bytes`). No es un typo.
+- Nombres de campos de memstats según versión de Telegraf: los Telegraf
+  recientes (p. ej. 1.39, el de la variante docker) emiten `influxdb_memstats`
+  en snake_case (`heap_inuse`, `pause_total_ns`, `num_gc`, `alloc`), igual que
+  `kapacitor_memstats` (`heap_in_use_bytes`, `num_gc`, `gc_cpu_fraction`). Los
+  dashboards usan esos nombres. **Caveat:** Telegraf antiguos emitían CamelCase
+  (`HeapInuse`, `PauseTotalNs`, `NumGC`); si tu despliegue real usa una versión
+  vieja, ajusta las queries de memstats del dashboard 02.
+- Tag `service` (no `server`) en `http_response` y `prometheus`: el plugin
+  `http_response` ya fija un tag `server` = la URL sondeada, que pisaría a un tag
+  propio con esa clave. Por eso los health checks etiquetan `service` =
+  `influxdb`/`kapacitor`, y los dashboards/CQs/alertas filtran por `service`.
 - El campo `up` (1/0) lo genera `processors.starlark` en Telegraf a partir de
   `http_response.result_code`. Es la base del SLA y de la alerta de disponibilidad.
 
@@ -89,8 +199,10 @@ host cpu/mem/disk/proc───┘        └──► Continuous Queries ──
    `01_cardinality.tick` que alerta al 70 %/90 % de `max-series-per-database`.
    `index-version = tsi1` ya activado en `influxdb.conf`.
 5. **Plantilla por instancia.** InfluxDB Deep y Kapacitor Deep usan el selector
-   `:url:` (tag `url`, único por instancia) y agrupan por `url`, así escalan a N
-   instancias sin tocar las queries.
+   `:instance:` (tag `instance`, único por instancia) y agrupan por `instance`,
+   así escalan a N instancias sin tocar las queries. Se usa `instance` en lugar
+   de `url` porque los valores del tag `url` son URLs cuyas `/` rompen el regex
+   `=~ /^:instance:$/` al interpolarlo Chronograf.
 6. **Percentiles de latencia.** Paneles p50/p95/p99 de la sonda `/ping`
    (muestras reales) y percentiles reales de **pausa de GC**
    (`go_gc_duration_seconds`, summary de `/metrics`, vía `inputs.prometheus`).
@@ -98,9 +210,38 @@ host cpu/mem/disk/proc───┘        └──► Continuous Queries ──
    > request en `/metrics` (eso llegó en 2.x). Por eso los percentiles de
    > latencia de servicio se aproximan con la sonda `/ping`; para p95/p99 reales
    > por endpoint haría falta instrumentación de aplicación o migrar a 2.x.
-7. **Alertas como código.** Cuatro TICKscripts en `tick/`: errores de ingesta,
+7. **Alertas como código.** TICKscripts en `tick/`: errores de ingesta,
    cardinalidad, errores en nodos de Kapacitor y disponibilidad (con `deadman`).
-   Se cargan solos desde el `[load]` dir.
+   Se cargan solos desde el `[load]` dir (subdirectorio `tasks/`).
 8. **Hardening.** Bloques comentados de auth/TLS en los tres `.conf`, uso de
    variables de entorno para contraseñas en Telegraf, y recordatorios de activar
    `auth-enabled`/`https` en producción.
+
+## Las 6 propuestas adicionales — IMPLEMENTADAS
+
+1. **Handlers de alertas como código.** Los 5 TICKscripts publican en el topic
+   `infra` (`.topic('infra')`) además de `.log()`. Los handlers viven en
+   `tick/handlers/` (montados en `/etc/kapacitor/load/handlers/` de kapacitor-01):
+   `log.yaml` (activo), `slack.yaml.example` y `smtp.yaml.example`. `kapacitor.conf`
+   trae `[[slack]]`/`[smtp]` deshabilitados con placeholders; el webhook/token se
+   inyecta por env (`KAPACITOR_SLACK_0_URL`), nunca en texto plano. Panel nuevo en
+   Kapacitor Deep con `kapacitor_topics.collected` (eventos por topic). Nota:
+   telegraf 1.39 **no** emite `kapacitor_alert`; se usa `kapacitor_topics`.
+2. **Compactaciones TSM.** Paneles en InfluxDB Deep: profundidad de cola por nivel
+   (`tsmLevel{1,2}CompactionQueue`, `tsmFullCompactionQueue`) y tasas + errores
+   (`tsm{Full,Level1}Compactions`, `cacheCompactions`, `…Err`) de
+   `influxdb_tsm1_engine`.
+3. **Pipeline de Telegraf.** Panel en Capacity con `internal_gather.gather_errors`
+   y `internal_write.metrics_dropped` (derivadas, por host) + TICKscript
+   `04_telegraf_pipeline.tick` (warn si buffer > 80 %, crit si descarta métricas;
+   topic `infra`).
+4. **Queries lentas.** `log-queries-after=10s` en `influxdb.conf` + bloque
+   `[[inputs.tail]]` (grok) **comentado** en `telegraf.conf` con instrucciones, y
+   panel "Queries lentas/min" en InfluxDB Deep (con nota de activación; vacío en
+   docker porque influxd loguea a stdout).
+5. **diskio.** Paneles en Capacity: latencia media `await`
+   (`Δ(read_time+write_time)/Δ(reads+writes)`), `iops_in_progress` y throughput
+   `read_bytes`/`write_bytes`/s, por host y dispositivo.
+6. **Retención.** `setup/sla_retention_and_cq.influxql` (aplicado por
+   `docker/setup-influx.sh`) fija `monitor` de `_internal` a 168h (7d, idempotente)
+   y deja documentado (comentado) el `ALTER` de `autogen` de telegraf a 30d.

@@ -9,7 +9,7 @@ var crit_pct = 90.0
 stream
     |from()
         .measurement('influxdb_database')
-        .groupBy('host', 'database')
+        .groupBy('instance', 'database')
     |eval(lambda: float("numSeries") / max_series * 100.0)
         .as('series_pct')
     |alert()
@@ -18,4 +18,5 @@ stream
         .warn(lambda: "series_pct" > warn_pct)
         .crit(lambda: "series_pct" > crit_pct)
         .stateChangesOnly()
+        .topic('infra')
         .log('/var/log/kapacitor/cardinality.log')

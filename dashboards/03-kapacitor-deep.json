@@ -15,7 +15,7 @@
         "name": "Tareas habilitadas / totales",
         "queries": [
           {
-            "query": "SELECT last(\"num_enabled_tasks\") AS \"num_enabled_tasks\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+            "query": "SELECT last(\"num_enabled_tasks\") AS \"num_enabled_tasks\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -27,7 +27,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT last(\"num_enabled_tasks\") AS \"num_enabled_tasks\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+              "rawText": "SELECT last(\"num_enabled_tasks\") AS \"num_enabled_tasks\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/",
               "range": null,
               "shifts": []
             },
@@ -115,7 +115,7 @@
         "name": "Suscripciones",
         "queries": [
           {
-            "query": "SELECT last(\"num_subscriptions\") AS \"num_subscriptions\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+            "query": "SELECT last(\"num_subscriptions\") AS \"num_subscriptions\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -127,7 +127,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT last(\"num_subscriptions\") AS \"num_subscriptions\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+              "rawText": "SELECT last(\"num_subscriptions\") AS \"num_subscriptions\" FROM \"telegraf\".\"autogen\".\"kapacitor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/",
               "range": null,
               "shifts": []
             },
@@ -212,10 +212,10 @@
         "y": 0,
         "w": 4,
         "h": 3,
-        "name": "Goroutines",
+        "name": "GC - num_gc/s y gc_cpu_fraction",
         "queries": [
           {
-            "query": "SELECT last(\"num_goroutine\") AS \"num_goroutine\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+            "query": "SELECT non_negative_derivative(max(\"num_gc\"), 1s) AS \"num_gc/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -227,7 +227,27 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT last(\"num_goroutine\") AS \"num_goroutine\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/",
+              "rawText": "SELECT non_negative_derivative(max(\"num_gc\"), 1s) AS \"num_gc/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          },
+          {
+            "query": "SELECT mean(\"gc_cpu_fraction\") AS \"gc_cpu_fraction\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT mean(\"gc_cpu_fraction\") AS \"gc_cpu_fraction\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -252,7 +272,7 @@
               "",
               ""
             ],
-            "label": "",
+            "label": "num_gc/s",
             "prefix": "",
             "suffix": "",
             "base": "10",
@@ -263,24 +283,41 @@
               "",
               ""
             ],
-            "label": "",
+            "label": "gc_cpu_fraction",
             "prefix": "",
             "suffix": "",
             "base": "10",
             "scale": "linear"
           }
         },
-        "type": "single-stat",
+        "type": "line",
         "colors": [
           {
-            "id": "base",
-            "type": "text",
-            "hex": "#00C9FF",
-            "name": "laser",
-            "value": "-1000000000000000000"
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
           }
         ],
-        "legend": {},
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
         "tableOptions": {
           "verticalTimeAxis": true,
           "sortBy": {
@@ -300,8 +337,8 @@
         ],
         "timeFormat": "MM/DD/YYYY HH:mm:ss",
         "decimalPlaces": {
-          "isEnforced": true,
-          "digits": 0
+          "isEnforced": false,
+          "digits": 2
         },
         "note": "",
         "noteVisibility": "default"
@@ -315,7 +352,7 @@
         "name": "Edges - recolectados/s vs emitidos/s",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -327,7 +364,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -335,7 +372,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"emitted\"), 1s) AS \"emitted/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"emitted\"), 1s) AS \"emitted/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -347,7 +384,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"emitted\"), 1s) AS \"emitted/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"emitted\"), 1s) AS \"emitted/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_edges\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -452,7 +489,7 @@
         "name": "Ingress - puntos recibidos/s por task",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"points_received\"), 1s) AS \"points_received/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_ingress\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"points_received\"), 1s) AS \"points_received/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_ingress\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -464,7 +501,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"points_received\"), 1s) AS \"points_received/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_ingress\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"points_received\"), 1s) AS \"points_received/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_ingress\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -569,7 +606,7 @@
         "name": "Nodos - errores/s y write_errors/s",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"errors\"), 1s) AS \"errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\", \"node\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"errors\"), 1s) AS \"errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\", \"node\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -581,7 +618,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"errors\"), 1s) AS \"errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\", \"node\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"errors\"), 1s) AS \"errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\", \"node\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -589,7 +626,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"write_errors\"), 1s) AS \"write_errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"write_errors\"), 1s) AS \"write_errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -601,7 +638,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"write_errors\"), 1s) AS \"write_errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"write_errors\"), 1s) AS \"write_errors/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -706,7 +743,7 @@
         "name": "Nodos - tiempo medio de ejecución (ms)",
         "queries": [
           {
-            "query": "SELECT mean(\"avg_exec_time_ns\")/1e6 AS \"ms\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+            "query": "SELECT mean(\"avg_exec_time_ns\")/1e6 AS \"ms\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -718,7 +755,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"avg_exec_time_ns\")/1e6 AS \"ms\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+              "rawText": "SELECT mean(\"avg_exec_time_ns\")/1e6 AS \"ms\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -823,7 +860,7 @@
         "name": "Alertas/s por nivel",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"crits_triggered\"), 1s) AS \"crits_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"crits_triggered\"), 1s) AS \"crits_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -835,7 +872,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"crits_triggered\"), 1s) AS \"crits_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"crits_triggered\"), 1s) AS \"crits_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -843,7 +880,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"warns_triggered\"), 1s) AS \"warns_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"warns_triggered\"), 1s) AS \"warns_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -855,7 +892,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"warns_triggered\"), 1s) AS \"warns_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"warns_triggered\"), 1s) AS \"warns_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -863,7 +900,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"infos_triggered\"), 1s) AS \"infos_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"infos_triggered\"), 1s) AS \"infos_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -875,7 +912,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"infos_triggered\"), 1s) AS \"infos_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"infos_triggered\"), 1s) AS \"infos_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -883,7 +920,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"oks_triggered\"), 1s) AS \"oks_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"oks_triggered\"), 1s) AS \"oks_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -895,7 +932,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"oks_triggered\"), 1s) AS \"oks_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"oks_triggered\"), 1s) AS \"oks_triggered/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1000,7 +1037,7 @@
         "name": "Cardinalidad de trabajo por task (working_cardinality)",
         "queries": [
           {
-            "query": "SELECT max(\"working_cardinality\") AS \"working_cardinality\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+            "query": "SELECT max(\"working_cardinality\") AS \"working_cardinality\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1012,7 +1049,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT max(\"working_cardinality\") AS \"working_cardinality\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"task\" fill(null)",
+              "rawText": "SELECT max(\"working_cardinality\") AS \"working_cardinality\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"task\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1117,7 +1154,7 @@
         "name": "Heap en uso (bytes)",
         "queries": [
           {
-            "query": "SELECT mean(\"heap_in_use_bytes\") AS \"heap_in_use_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT mean(\"heap_in_use_bytes\") AS \"heap_in_use_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1129,7 +1166,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"heap_in_use_bytes\") AS \"heap_in_use_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT mean(\"heap_in_use_bytes\") AS \"heap_in_use_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1137,7 +1174,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT mean(\"alloc_bytes\") AS \"alloc_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT mean(\"alloc_bytes\") AS \"alloc_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1149,7 +1186,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"alloc_bytes\") AS \"alloc_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT mean(\"alloc_bytes\") AS \"alloc_bytes\" FROM \"telegraf\".\"autogen\".\"kapacitor_memstats\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1254,7 +1291,7 @@
         "name": "Puntos escritos a InfluxDB/s (nodes)",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"points_written\"), 1s) AS \"points_written/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"points_written\"), 1s) AS \"points_written/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1266,7 +1303,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"points_written\"), 1s) AS \"points_written/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"url\" =~ /^:url:$/ GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"points_written\"), 1s) AS \"points_written/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_nodes\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1361,21 +1398,138 @@
         },
         "note": "",
         "noteVisibility": "default"
+      },
+      {
+        "i": "0fef1e3d-712b-41fd-a263-ffdee9209485",
+        "x": 0,
+        "y": 19,
+        "w": 12,
+        "h": 4,
+        "name": "Eventos de alerta por topic/s (MEJORA #1)",
+        "queries": [
+          {
+            "query": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_topics\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"id\" fill(null)",
+            "queryConfig": {
+              "database": "telegraf",
+              "measurement": "",
+              "retentionPolicy": "autogen",
+              "fields": [],
+              "tags": {},
+              "groupBy": {
+                "time": "",
+                "tags": []
+              },
+              "areaTags": [],
+              "rawText": "SELECT non_negative_derivative(max(\"collected\"), 1s) AS \"collected/s\" FROM \"telegraf\".\"autogen\".\"kapacitor_topics\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"id\" fill(null)",
+              "range": null,
+              "shifts": []
+            },
+            "source": "",
+            "type": "influxql"
+          }
+        ],
+        "axes": {
+          "x": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "events/s",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          },
+          "y2": {
+            "bounds": [
+              "",
+              ""
+            ],
+            "label": "",
+            "prefix": "",
+            "suffix": "",
+            "base": "10",
+            "scale": "linear"
+          }
+        },
+        "type": "line",
+        "colors": [
+          {
+            "id": "0",
+            "type": "scale",
+            "hex": "#31C0F6",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "1",
+            "type": "scale",
+            "hex": "#A500A5",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          },
+          {
+            "id": "2",
+            "type": "scale",
+            "hex": "#FF7E27",
+            "name": "Nineteen Eighty Four",
+            "value": "0"
+          }
+        ],
+        "legend": {
+          "type": "static",
+          "orientation": "bottom"
+        },
+        "tableOptions": {
+          "verticalTimeAxis": true,
+          "sortBy": {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          },
+          "wrapping": "truncate",
+          "fixFirstColumn": true
+        },
+        "fieldOptions": [
+          {
+            "internalName": "time",
+            "displayName": "",
+            "visible": true
+          }
+        ],
+        "timeFormat": "MM/DD/YYYY HH:mm:ss",
+        "decimalPlaces": {
+          "isEnforced": false,
+          "digits": 2
+        },
+        "note": "MEJORA #1: kapacitor 1.8/telegraf 1.39 no emiten kapacitor_alert; se usa kapacitor_topics.collected (eventos por topic, incl. 'infra' de los handlers).",
+        "noteVisibility": "showWhenNoData"
       }
     ],
     "templates": [
       {
-        "tempVar": ":url:",
+        "tempVar": ":instance:",
         "id": "6b642b95-39d7-4729-8df4-b7e138bce4b3",
         "type": "tagValues",
         "label": "",
         "values": [],
         "query": {
-          "influxql": "SHOW TAG VALUES ON \"telegraf\" FROM \"kapacitor\" WITH KEY = \"url\"",
+          "influxql": "SHOW TAG VALUES ON \"telegraf\" FROM \"kapacitor\" WITH KEY = \"instance\"",
           "db": "telegraf",
           "rp": "",
           "measurement": "kapacitor",
-          "tagKey": "url",
+          "tagKey": "instance",
           "fieldKey": ""
         }
       }

@@ -1,0 +1,9 @@
+# Ejemplo de handler Slack para el topic 'infra'.
+# Actívalo: renómbralo a slack.yaml y habilita [[slack]] en kapacitor.conf.
+# El webhook/token NO va aquí (solo el canal); se inyecta por env:
+#   KAPACITOR_SLACK_0_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ
+topic: infra
+id: slack-infra
+kind: slack
+options:
+  channel: '#infra-alerts'

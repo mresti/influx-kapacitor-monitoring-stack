@@ -15,7 +15,7 @@
         "name": "InfluxDB SLA (%) · obj 99.9",
         "queries": [
           {
-            "query": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='influxdb'",
+            "query": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='influxdb'",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -27,7 +27,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='influxdb'",
+              "rawText": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='influxdb'",
               "range": null,
               "shifts": []
             },
@@ -129,7 +129,7 @@
         "name": "Kapacitor SLA (%) · obj 99.9",
         "queries": [
           {
-            "query": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='kapacitor'",
+            "query": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='kapacitor'",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -141,7 +141,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='kapacitor'",
+              "rawText": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='kapacitor'",
               "range": null,
               "shifts": []
             },
@@ -243,7 +243,7 @@
         "name": "Error budget restante InfluxDB (%)",
         "queries": [
           {
-            "query": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='influxdb'",
+            "query": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='influxdb'",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -255,7 +255,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='influxdb'",
+              "rawText": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='influxdb'",
               "range": null,
               "shifts": []
             },
@@ -357,7 +357,7 @@
         "name": "Error budget restante Kapacitor (%)",
         "queries": [
           {
-            "query": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='kapacitor'",
+            "query": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='kapacitor'",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -369,7 +369,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"server\"='kapacitor'",
+              "rawText": "SELECT (1 - (1 - mean(\"up\"))/(1 - 99.9/100))*100 AS \"budget %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ AND \"service\"='kapacitor'",
               "range": null,
               "shifts": []
             },
@@ -471,7 +471,7 @@
         "name": "SLA por instancia (%)",
         "queries": [
           {
-            "query": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY \"server\", \"instance\"",
+            "query": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY \"service\", \"instance\"",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -483,7 +483,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY \"server\", \"instance\"",
+              "rawText": "SELECT mean(\"up\")*100 AS \"SLA %\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY \"service\", \"instance\"",
               "range": null,
               "shifts": []
             },
@@ -585,7 +585,7 @@
         "name": "Disponibilidad en el tiempo (%)",
         "queries": [
           {
-            "query": "SELECT mean(\"up\")*100 AS \"%\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"instance\" fill(none)",
+            "query": "SELECT mean(\"up\")*100 AS \"%\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(none)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -597,7 +597,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"up\")*100 AS \"%\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"instance\" fill(none)",
+              "rawText": "SELECT mean(\"up\")*100 AS \"%\" FROM \"telegraf\".\"autogen\".\"http_response\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(none)",
               "range": null,
               "shifts": []
             },
@@ -702,7 +702,7 @@
         "name": "Ingesta InfluxDB - % escrituras OK (1 - fail/ok)",
         "queries": [
           {
-            "query": "SELECT (1 - non_negative_derivative(max(\"pointsWrittenFail\"),1s) / non_negative_derivative(max(\"pointsWrittenOK\"),1s)) * 100 AS \"write OK %\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT (1 - non_negative_derivative(max(\"pointsWrittenFail\"),1s) / non_negative_derivative(max(\"pointsWrittenOK\"),1s)) * 100 AS \"write OK %\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -714,7 +714,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT (1 - non_negative_derivative(max(\"pointsWrittenFail\"),1s) / non_negative_derivative(max(\"pointsWrittenOK\"),1s)) * 100 AS \"write OK %\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT (1 - non_negative_derivative(max(\"pointsWrittenFail\"),1s) / non_negative_derivative(max(\"pointsWrittenOK\"),1s)) * 100 AS \"write OK %\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -819,7 +819,7 @@
         "name": "Ingesta InfluxDB - puntos fallidos+descartados/s",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"pointsWrittenFail\"), 1s) AS \"pointsWrittenFail/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"pointsWrittenFail\"), 1s) AS \"pointsWrittenFail/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -831,7 +831,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"pointsWrittenFail\"), 1s) AS \"pointsWrittenFail/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"pointsWrittenFail\"), 1s) AS \"pointsWrittenFail/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -839,7 +839,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"pointsWrittenDropped\"), 1s) AS \"pointsWrittenDropped/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"url\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"pointsWrittenDropped\"), 1s) AS \"pointsWrittenDropped/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -851,7 +851,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"pointsWrittenDropped\"), 1s) AS \"pointsWrittenDropped/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"url\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"pointsWrittenDropped\"), 1s) AS \"pointsWrittenDropped/s\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -956,7 +956,7 @@
         "name": "SLA histórico diario (Continuous Query · sla_long.sla_daily)",
         "queries": [
           {
-            "query": "SELECT mean(\"availability\") AS \"SLA %\" FROM \"telegraf\".\"sla_long\".\"sla_daily\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(1d), \"server\", \"instance\" fill(none)",
+            "query": "SELECT mean(\"availability\") AS \"SLA %\" FROM \"telegraf\".\"sla_long\".\"sla_daily\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(1d), \"service\", \"instance\" fill(none)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -968,7 +968,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"availability\") AS \"SLA %\" FROM \"telegraf\".\"sla_long\".\"sla_daily\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(1d), \"server\", \"instance\" fill(none)",
+              "rawText": "SELECT mean(\"availability\") AS \"SLA %\" FROM \"telegraf\".\"sla_long\".\"sla_daily\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(1d), \"service\", \"instance\" fill(none)",
               "range": null,
               "shifts": []
             },
@@ -1065,7 +1065,56 @@
         "noteVisibility": "default"
       }
     ],
-    "templates": [],
+    "templates": [
+      {
+        "tempVar": ":instance:",
+        "id": "4434c4f2-d2c8-43d5-8684-feecc3c6cf9b",
+        "type": "csv",
+        "label": "",
+        "values": [
+          {
+            "value": ".*",
+            "type": "csv",
+            "selected": true
+          },
+          {
+            "value": "influxdb-01",
+            "type": "csv",
+            "selected": false
+          },
+          {
+            "value": "influxdb-02",
+            "type": "csv",
+            "selected": false
+          },
+          {
+            "value": "kapacitor-01",
+            "type": "csv",
+            "selected": false
+          },
+          {
+            "value": "kapacitor-02",
+            "type": "csv",
+            "selected": false
+          },
+          {
+            "value": "kapacitor-03",
+            "type": "csv",
+            "selected": false
+          },
+          {
+            "value": "kapacitor-04",
+            "type": "csv",
+            "selected": false
+          },
+          {
+            "value": "kapacitor-05",
+            "type": "csv",
+            "selected": false
+          }
+        ]
+      }
+    ],
     "name": "04 - SLA Stats"
   }
 }

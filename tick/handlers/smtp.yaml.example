@@ -1,0 +1,9 @@
+# Ejemplo de handler SMTP (email) para el topic 'infra'.
+# Actívalo: renómbralo a smtp.yaml, descomenta y habilita [smtp] en
+# kapacitor.conf (credenciales por env, no en texto plano).
+# topic: infra
+# id: smtp-infra
+# kind: smtp
+# options:
+#   to:
+#     - 'oncall@example.com'

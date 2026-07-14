@@ -1,0 +1,8 @@
+# Handler ACTIVO del topic 'infra': registra cada alerta en un fichero.
+# Se carga desde /etc/kapacitor/load/handlers/ (solo en kapacitor-01, el de
+# alertas). Kapacitor solo carga handlers .yaml/.yml/.json; los .example no.
+topic: infra
+id: log-infra
+kind: log
+options:
+  path: '/var/lib/kapacitor/infra_alerts.log'

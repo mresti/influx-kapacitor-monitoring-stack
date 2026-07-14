@@ -1,0 +1,41 @@
+// MEJORA #7 (pipeline de Telegraf): vigila el propio Telegraf.
+//   warn -> buffer de salida > 80% de su límite (riesgo de descartar métricas)
+//   crit -> Telegraf descartando métricas (metrics_dropped creciendo)
+// Publica en el topic 'infra' (handlers en tick/handlers/).
+dbrp "telegraf"."autogen"
+
+var buffer_warn_pct = 80.0
+
+stream
+    |from()
+        .measurement('internal_write')
+        .groupBy('host')
+    |eval(lambda: float("buffer_size") / float("buffer_limit") * 100.0)
+        .as('buffer_pct')
+    |alert()
+        .id('telegraf-buffer/{{ index .Tags "host" }}')
+        .message('Telegraf buffer {{ .Level }} en {{ index .Tags "host" }}: {{ index .Fields "buffer_pct" | printf "%.1f" }}% del limite')
+        .warn(lambda: "buffer_pct" > buffer_warn_pct)
+        .stateChangesOnly()
+        .topic('infra')
+        .log('/var/log/kapacitor/telegraf_pipeline.log')
+
+stream
+    |from()
+        .measurement('internal_write')
+        .groupBy('host')
+    |derivative('metrics_dropped')
+        .unit(1s)
+        .nonNegative()
+    |window()
+        .period(2m)
+        .every(1m)
+    |mean('metrics_dropped')
+        .as('drop_rate')
+    |alert()
+        .id('telegraf-metrics-dropped/{{ index .Tags "host" }}')
+        .message('Telegraf {{ .Level }} descartando metricas en {{ index .Tags "host" }}: {{ index .Fields "drop_rate" | printf "%.2f" }}/s')
+        .crit(lambda: "drop_rate" > 0.0)
+        .stateChangesOnly()
+        .topic('infra')
+        .log('/var/log/kapacitor/telegraf_pipeline.log')

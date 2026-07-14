@@ -4,7 +4,7 @@ dbrp "telegraf"."autogen"
 stream
     |from()
         .measurement('kapacitor_nodes')
-        .groupBy('host', 'task')
+        .groupBy('instance', 'task')
     |derivative('errors')
         .unit(1s)
         .nonNegative()
@@ -19,4 +19,5 @@ stream
         .warn(lambda: "err_rate" > 0.0)
         .crit(lambda: "err_rate" > 1.0)
         .stateChangesOnly()
+        .topic('infra')
         .log('/var/log/kapacitor/node_errors.log')

@@ -8,7 +8,13 @@
 -- RP de larga duración para datos pre-agregados (informes mensuales/anuales)
 CREATE RETENTION POLICY "sla_long" ON "telegraf" DURATION 400d REPLICATION 1;
 
--- (Opcional) acotar los datos crudos para controlar disco. Ajusta a tu gusto:
+-- MEJORA #6 (retención): acota el _internal de InfluxDB. La RP "monitor" suele
+-- venir por defecto a 7d; fijarla explícitamente es idempotente y evita
+-- sorpresas si un despliegue la trae distinta. 168h = 7 días.
+ALTER RETENTION POLICY "monitor" ON "_internal" DURATION 168h REPLICATION 1 DEFAULT;
+
+-- (Opcional) acotar los datos crudos de telegraf para controlar disco. Descomenta
+-- y ajusta; hazlo DEFAULT para que los writes sin RP explícita caigan aquí:
 -- ALTER RETENTION POLICY "autogen" ON "telegraf" DURATION 30d REPLICATION 1 DEFAULT;
 
 -- -----------------------------------------------------------------------------
@@ -20,7 +26,7 @@ BEGIN
   SELECT mean("up") * 100 AS "availability"
   INTO "telegraf"."sla_long"."sla_hourly"
   FROM "telegraf"."autogen"."http_response"
-  GROUP BY time(1h), "server", "instance"
+  GROUP BY time(1h), "service", "instance"
 END;
 
 -- Disponibilidad diaria (para rangos de meses sin escanear millones de puntos)
@@ -29,7 +35,7 @@ BEGIN
   SELECT mean("availability") AS "availability"
   INTO "telegraf"."sla_long"."sla_daily"
   FROM "telegraf"."sla_long"."sla_hourly"
-  GROUP BY time(1d), "server", "instance"
+  GROUP BY time(1d), "service", "instance"
 END;
 
 -- -----------------------------------------------------------------------------
@@ -41,5 +47,5 @@ BEGIN
   SELECT max("numSeries") AS "numSeries", max("numMeasurements") AS "numMeasurements"
   INTO "telegraf"."sla_long"."cardinality_hourly"
   FROM "telegraf"."autogen"."influxdb_database"
-  GROUP BY time(1h), "database", "host"
+  GROUP BY time(1h), "database", "instance"
 END;

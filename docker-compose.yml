@@ -1,0 +1,218 @@
+# =============================================================================
+# Stack TICK para pruebas locales, TOPOLOGÍA REAL (instancias independientes):
+#
+#   influxdb-01  InfluxDB de MONITORIZACIÓN  (recibe la DB "telegraf")
+#   kapacitor-01 Kapacitor de ALERTAS, SUSCRITO a influxdb-01; es el único que
+#                carga los TICKscripts (tick/) y los handlers (tick/handlers/).
+#                >>> Caso de uso clave: el Kapacitor de alertas cuelga del
+#                    InfluxDB de MONITORIZACIÓN, no del de datos. <<<
+#   influxdb-02  InfluxDB de DATOS de negocio
+#   kapacitor-02..05  Kapacitor de datos, conectados a influxdb-02 (sin tasks).
+#
+# Telegraf (imagen 1.39.1, última 1.39.x) observa las 7 instancias y escribe la
+# DB "telegraf" en influxdb-01. Chronograf lee de influxdb-01.
+#
+#   docker compose up -d
+#
+# One-shots: influx-setup (DB/RP/CQs en influxdb-01), chronograf-provision
+# (source + 5 dashboards). Limitación local: sin inputs.procstat -> paneles de
+# uptime de proceso / RSS / FDs vacíos.
+# =============================================================================
+
+x-kapacitor-common: &kapacitor-common
+  image: kapacitor:1.8.2
+  restart: unless-stopped
+  # El conf canónico usa rutas relativas (kapacitor.db, replay/, tasks/); fijamos
+  # el cwd al volumen persistente porque el cwd por defecto (/) no es escribible.
+  working_dir: /var/lib/kapacitor
+  healthcheck:
+    test: ["CMD", "curl", "-sf", "http://localhost:9092/kapacitor/v1/ping"]
+    interval: 5s
+    timeout: 3s
+    retries: 12
+    start_period: 10s
+
+services:
+  influxdb-01:
+    image: influxdb:1.8.10
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./conf/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - influxdb01-data:/var/lib/influxdb
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8086/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  influxdb-02:
+    image: influxdb:1.8.10
+    restart: unless-stopped
+    ports:
+      - "8087:8086"
+    volumes:
+      - ./conf/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - influxdb02-data:/var/lib/influxdb
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8086/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  # --- Kapacitor de ALERTAS: suscrito a influxdb-01 (monitorización) ----------
+  kapacitor-01:
+    <<: *kapacitor-common
+    ports:
+      - "9092:9092"
+    depends_on:
+      influxdb-01:
+        condition: service_healthy
+    environment:
+      # KAPACITOR_HOSTNAME = nombre de servicio: la suscripción de influxdb-01
+      # postea a http://kapacitor-01:9092. Conecta a influxdb-01 (monitorización).
+      KAPACITOR_HOSTNAME: kapacitor-01
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb-01:8086
+      KAPACITOR_INFLUXDB_0_NAME: influxdb-01
+    volumes:
+      - ./conf/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+      # SOLO kapacitor-01 carga tasks y handlers ([load] escanea tasks/ y handlers/).
+      - ./tick:/etc/kapacitor/load/tasks:ro
+      - ./tick/handlers:/etc/kapacitor/load/handlers:ro
+      - kapacitor01-data:/var/lib/kapacitor
+
+  # --- Kapacitor de DATOS: conectados a influxdb-02, sin tasks ----------------
+  kapacitor-02:
+    <<: *kapacitor-common
+    ports:
+      - "9093:9092"
+    depends_on:
+      influxdb-02:
+        condition: service_healthy
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor-02
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb-02:8086
+      KAPACITOR_INFLUXDB_0_NAME: influxdb-02
+      KAPACITOR_LOAD_ENABLED: "false"   # sin TICKscripts (no monta load dir)
+    volumes:
+      - ./conf/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+      - kapacitor02-data:/var/lib/kapacitor
+
+  kapacitor-03:
+    <<: *kapacitor-common
+    ports:
+      - "9094:9092"
+    depends_on:
+      influxdb-02:
+        condition: service_healthy
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor-03
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb-02:8086
+      KAPACITOR_INFLUXDB_0_NAME: influxdb-02
+      KAPACITOR_LOAD_ENABLED: "false"
+    volumes:
+      - ./conf/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+      - kapacitor03-data:/var/lib/kapacitor
+
+  kapacitor-04:
+    <<: *kapacitor-common
+    ports:
+      - "9095:9092"
+    depends_on:
+      influxdb-02:
+        condition: service_healthy
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor-04
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb-02:8086
+      KAPACITOR_INFLUXDB_0_NAME: influxdb-02
+      KAPACITOR_LOAD_ENABLED: "false"
+    volumes:
+      - ./conf/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+      - kapacitor04-data:/var/lib/kapacitor
+
+  kapacitor-05:
+    <<: *kapacitor-common
+    ports:
+      - "9096:9092"
+    depends_on:
+      influxdb-02:
+        condition: service_healthy
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor-05
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb-02:8086
+      KAPACITOR_INFLUXDB_0_NAME: influxdb-02
+      KAPACITOR_LOAD_ENABLED: "false"
+    volumes:
+      - ./conf/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+      - kapacitor05-data:/var/lib/kapacitor
+
+  telegraf:
+    image: telegraf:1.39.1        # pin a la última 1.39.x
+    restart: unless-stopped
+    depends_on:
+      influxdb-01:
+        condition: service_healthy
+      influxdb-02:
+        condition: service_healthy
+      kapacitor-01:
+        condition: service_started
+    volumes:
+      - ./docker/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  chronograf:
+    image: chronograf:1.10.9
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    depends_on:
+      influxdb-01:
+        condition: service_healthy
+    volumes:
+      - chronograf-data:/var/lib/chronograf
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8888/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  influx-setup:
+    image: influxdb:1.8.10
+    restart: "no"
+    depends_on:
+      influxdb-01:
+        condition: service_healthy
+    environment:
+      INFLUX_HOST: influxdb-01
+    entrypoint: ["sh", "/setup-influx.sh"]
+    volumes:
+      - ./setup:/setup:ro
+      - ./docker/setup-influx.sh:/setup-influx.sh:ro
+
+  chronograf-provision:
+    image: python:3.12-alpine
+    restart: "no"
+    depends_on:
+      chronograf:
+        condition: service_healthy
+      influxdb-01:
+        condition: service_healthy
+    environment:
+      INFLUXDB_URL: http://influxdb-01:8086
+    command: ["python", "/provision-chronograf.py"]
+    volumes:
+      - ./dashboards:/dashboards:ro
+      - ./docker/provision-chronograf.py:/provision-chronograf.py:ro
+
+volumes:
+  influxdb01-data:
+  influxdb02-data:
+  kapacitor01-data:
+  kapacitor02-data:
+  kapacitor03-data:
+  kapacitor04-data:
+  kapacitor05-data:
+  chronograf-data:
