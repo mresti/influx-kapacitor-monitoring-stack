@@ -1069,50 +1069,17 @@
       {
         "tempVar": ":instance:",
         "id": "4434c4f2-d2c8-43d5-8684-feecc3c6cf9b",
-        "type": "csv",
+        "type": "tagValues",
         "label": "",
-        "values": [
-          {
-            "value": ".*",
-            "type": "csv",
-            "selected": true
-          },
-          {
-            "value": "influxdb-01",
-            "type": "csv",
-            "selected": false
-          },
-          {
-            "value": "influxdb-02",
-            "type": "csv",
-            "selected": false
-          },
-          {
-            "value": "kapacitor-01",
-            "type": "csv",
-            "selected": false
-          },
-          {
-            "value": "kapacitor-02",
-            "type": "csv",
-            "selected": false
-          },
-          {
-            "value": "kapacitor-03",
-            "type": "csv",
-            "selected": false
-          },
-          {
-            "value": "kapacitor-04",
-            "type": "csv",
-            "selected": false
-          },
-          {
-            "value": "kapacitor-05",
-            "type": "csv",
-            "selected": false
-          }
-        ]
+        "values": [],
+        "query": {
+          "influxql": "SHOW TAG VALUES ON \"telegraf\" FROM \"http_response\" WITH KEY = \"instance\"",
+          "db": "telegraf",
+          "rp": "",
+          "measurement": "http_response",
+          "tagKey": "instance",
+          "fieldKey": ""
+        }
       }
     ],
     "name": "04 - SLA Stats"

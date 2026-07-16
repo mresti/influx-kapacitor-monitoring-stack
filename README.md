@@ -64,19 +64,20 @@ monitorización**, no del de datos.
 
 ### Selectores de instancia (`:instance:`)
 
-Todos los dashboards se filtran por la variable de plantilla `:instance:`
-(`AND "instance" =~ /^:instance:$/`), pero de dos formas:
+Los dashboards que filtran por instancia usan la variable de plantilla
+`:instance:` (`AND "instance" =~ /^:instance:$/`) de tipo **tagValues**
+(dinámica): `SHOW TAG VALUES ... WITH KEY = "instance"`. Descubre las instancias
+solas según lo que hay en la DB (no hay que mantener listas; instancia nueva =
+aparece sola al llegar datos):
 
-- **InfluxDB Deep / Kapacitor Deep (02, 03):** variable **tagValues** (dinámica):
-  `SHOW TAG VALUES ... WITH KEY = "instance"`. Descubre las instancias solas
-  según lo que hay en la DB (no hay que mantener listas).
-- **Health / SLA / Capacity (01, 04, 05):** variable **csv** (Chronograf no ofrece
-  opción "All" en tagValues). El primer valor es `.*` y va **seleccionado por
-  defecto**: al interpolarse da `/^.*$/`, que matchea todas las instancias
-  (visibilidad global). El resto de valores (`influxdb-01/02`, `kapacitor-01..05`)
-  permiten fijar una sola instancia. **Para añadir una instancia nueva**: edita la
-  variable (Chronograf → el lápiz de `:instance:`) y añade su valor a la lista csv;
-  `.*` seguirá mostrándolas todas.
+- **InfluxDB Deep (02):** desde `influxdb_httpd`.
+- **Kapacitor Deep (03):** desde `kapacitor`.
+- **SLA / Capacity (04, 05):** desde `http_response` (única medida con el tag
+  `instance` de las 7 instancias: influx + kapacitor).
+
+**Health (01):** no tiene variable ni filtro `instance`. Como Chronograf no
+ofrece opción "All" en tagValues, el overview muestra **siempre todas las
+instancias** vía `GROUP BY "instance"`.
 
 Los paneles de measurements sin tag `instance` (host: `cpu`, `mem`, `disk`,
 `diskio`, `system`, `internal_*`; y `procstat`) no se filtran por `:instance:`:
@@ -109,6 +110,33 @@ host cpu/mem/disk/proc───┘        └──► Continuous Queries ──
    Kapacitor, o cárgalas con `kapacitor define ... -tick ...`. Comprueba con
    `kapacitor list tasks`.
 5. En Chronograf: **Dashboards → Import Dashboard** y sube cada `.json`.
+
+## Importar dashboards por la UI de Chronograf
+
+Método manual (alternativa a `docker compose up chronograf-provision`).
+
+**Prerequisitos:**
+
+1. Un **source** en Chronograf apuntando al InfluxDB de **monitorización**
+   (influxdb-01), con **Telegraf Database = `telegraf`**.
+2. Para el **dashboard 04**: la RP `sla_long` y las Continuous Queries creadas
+   **antes** (`setup/sla_retention_and_cq.influxql`); si no, el panel de histórico
+   diario sale vacío.
+3. Telegraf ya **escribiendo datos**: con la DB vacía el desplegable `:instance:`
+   sale vacío; se puebla solo en cuanto hay datos (es dinámico, `tagValues`).
+
+**Pasos** (por cada fichero de `dashboards/`):
+
+1. **Dashboards → Import Dashboard**.
+2. Arrastra el `.json` del repo (el formato `{"meta": ..., "dashboard": ...}` es
+   justo el que espera la UI).
+3. En **Reconcile Sources**, mapea al source local.
+4. **Import**. Repite por cada fichero.
+
+**Aviso:** la UI **siempre crea un dashboard nuevo** (no deduplica por nombre): al
+reimportar, **borra antes el antiguo** o tendrás duplicados. El script
+`docker compose up chronograf-provision` **sí** deduplica (PUT por nombre) y es el
+método preferido.
 
 ## Prueba local con Docker Compose
 
