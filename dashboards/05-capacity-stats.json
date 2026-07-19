@@ -366,7 +366,7 @@
         "name": "Disco del host - % usado",
         "queries": [
           {
-            "query": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"path\" fill(null)",
+            "query": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"path\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -378,7 +378,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"path\" fill(null)",
+              "rawText": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"path\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -483,7 +483,7 @@
         "name": "Memoria RSS por proceso (influxd / kapacitord)",
         "queries": [
           {
-            "query": "SELECT mean(\"memory_rss\") AS \"memory_rss\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
+            "query": "SELECT mean(\"memory_rss\") AS \"memory_rss\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -495,7 +495,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"memory_rss\") AS \"memory_rss\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
+              "rawText": "SELECT mean(\"memory_rss\") AS \"memory_rss\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -600,7 +600,7 @@
         "name": "Descriptores de fichero abiertos (FDs)",
         "queries": [
           {
-            "query": "SELECT max(\"num_fds\") AS \"num_fds\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
+            "query": "SELECT max(\"num_fds\") AS \"num_fds\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -612,7 +612,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT max(\"num_fds\") AS \"num_fds\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
+              "rawText": "SELECT max(\"num_fds\") AS \"num_fds\" FROM \"telegraf\".\"autogen\".\"procstat\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"process_name\", \"service\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -717,7 +717,7 @@
         "name": "CPU host - % usado (no idle)",
         "queries": [
           {
-            "query": "SELECT 100 - mean(\"usage_idle\") AS \"cpu %\" FROM \"telegraf\".\"autogen\".\"cpu\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT 100 - mean(\"usage_idle\") AS \"cpu %\" FROM \"telegraf\".\"autogen\".\"cpu\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -729,7 +729,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT 100 - mean(\"usage_idle\") AS \"cpu %\" FROM \"telegraf\".\"autogen\".\"cpu\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT 100 - mean(\"usage_idle\") AS \"cpu %\" FROM \"telegraf\".\"autogen\".\"cpu\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -834,7 +834,7 @@
         "name": "Load average (1m)",
         "queries": [
           {
-            "query": "SELECT mean(\"load1\") AS \"load1\" FROM \"telegraf\".\"autogen\".\"system\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT mean(\"load1\") AS \"load1\" FROM \"telegraf\".\"autogen\".\"system\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -846,7 +846,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"load1\") AS \"load1\" FROM \"telegraf\".\"autogen\".\"system\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT mean(\"load1\") AS \"load1\" FROM \"telegraf\".\"autogen\".\"system\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -951,7 +951,7 @@
         "name": "RAM host - % usada",
         "queries": [
           {
-            "query": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"mem\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"mem\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -963,7 +963,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"mem\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT mean(\"used_percent\") AS \"used_percent\" FROM \"telegraf\".\"autogen\".\"mem\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1185,7 +1185,7 @@
         "name": "Telegraf - buffer de métricas (size vs limit)",
         "queries": [
           {
-            "query": "SELECT mean(\"metrics_written\") AS \"metrics_written\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT mean(\"metrics_written\") AS \"metrics_written\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1197,7 +1197,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"metrics_written\") AS \"metrics_written\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT mean(\"metrics_written\") AS \"metrics_written\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1205,7 +1205,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT mean(\"buffer_size\") AS \"buffer_size\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT mean(\"buffer_size\") AS \"buffer_size\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1217,7 +1217,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"buffer_size\") AS \"buffer_size\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT mean(\"buffer_size\") AS \"buffer_size\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1225,7 +1225,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT max(\"buffer_limit\") AS \"buffer_limit\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT max(\"buffer_limit\") AS \"buffer_limit\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1237,7 +1237,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT max(\"buffer_limit\") AS \"buffer_limit\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT max(\"buffer_limit\") AS \"buffer_limit\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1456,7 +1456,7 @@
         "name": "Uso de disco del host máx (%)",
         "queries": [
           {
-            "query": "SELECT max(\"used_percent\") AS \"% disco\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime:",
+            "query": "SELECT max(\"used_percent\") AS \"% disco\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1468,7 +1468,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT max(\"used_percent\") AS \"% disco\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime:",
+              "rawText": "SELECT max(\"used_percent\") AS \"% disco\" FROM \"telegraf\".\"autogen\".\"disk\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/",
               "range": null,
               "shifts": []
             },
@@ -1570,7 +1570,7 @@
         "name": "Telegraf pipeline - gather_errors/s y metrics_dropped/s (MEJORA #3)",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"gather_errors\"), 1s) AS \"gather_errors/s\" FROM \"telegraf\".\"autogen\".\"internal_gather\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"gather_errors\"), 1s) AS \"gather_errors/s\" FROM \"telegraf\".\"autogen\".\"internal_gather\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1582,7 +1582,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"gather_errors\"), 1s) AS \"gather_errors/s\" FROM \"telegraf\".\"autogen\".\"internal_gather\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"gather_errors\"), 1s) AS \"gather_errors/s\" FROM \"telegraf\".\"autogen\".\"internal_gather\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1590,7 +1590,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"metrics_dropped\"), 1s) AS \"metrics_dropped/s\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"metrics_dropped\"), 1s) AS \"metrics_dropped/s\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1602,7 +1602,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"metrics_dropped\"), 1s) AS \"metrics_dropped/s\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"metrics_dropped\"), 1s) AS \"metrics_dropped/s\" FROM \"telegraf\".\"autogen\".\"internal_write\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1707,7 +1707,7 @@
         "name": "Disco - latencia media await (ms) (MEJORA #5)",
         "queries": [
           {
-            "query": "SELECT (non_negative_derivative(max(\"read_time\"), 1s) + non_negative_derivative(max(\"write_time\"), 1s)) / (non_negative_derivative(max(\"reads\"), 1s) + non_negative_derivative(max(\"writes\"), 1s)) AS \"await ms\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+            "query": "SELECT (non_negative_derivative(max(\"read_time\"), 1s) + non_negative_derivative(max(\"write_time\"), 1s)) / (non_negative_derivative(max(\"reads\"), 1s) + non_negative_derivative(max(\"writes\"), 1s)) AS \"await ms\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1719,7 +1719,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT (non_negative_derivative(max(\"read_time\"), 1s) + non_negative_derivative(max(\"write_time\"), 1s)) / (non_negative_derivative(max(\"reads\"), 1s) + non_negative_derivative(max(\"writes\"), 1s)) AS \"await ms\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+              "rawText": "SELECT (non_negative_derivative(max(\"read_time\"), 1s) + non_negative_derivative(max(\"write_time\"), 1s)) / (non_negative_derivative(max(\"reads\"), 1s) + non_negative_derivative(max(\"writes\"), 1s)) AS \"await ms\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1824,7 +1824,7 @@
         "name": "Disco - IOPS en progreso (MEJORA #5)",
         "queries": [
           {
-            "query": "SELECT mean(\"iops_in_progress\") AS \"iops_in_progress\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+            "query": "SELECT mean(\"iops_in_progress\") AS \"iops_in_progress\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1836,7 +1836,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT mean(\"iops_in_progress\") AS \"iops_in_progress\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+              "rawText": "SELECT mean(\"iops_in_progress\") AS \"iops_in_progress\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1941,7 +1941,7 @@
         "name": "Disco - throughput read/write (bytes/s) (MEJORA #5)",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"read_bytes\"), 1s) AS \"read/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"read_bytes\"), 1s) AS \"read/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1953,7 +1953,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"read_bytes\"), 1s) AS \"read/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"read_bytes\"), 1s) AS \"read/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1961,7 +1961,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"write_bytes\"), 1s) AS \"write/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"write_bytes\"), 1s) AS \"write/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1973,7 +1973,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"write_bytes\"), 1s) AS \"write/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: GROUP BY time(:interval:), \"host\", \"name\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"write_bytes\"), 1s) AS \"write/s\" FROM \"telegraf\".\"autogen\".\"diskio\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\", \"name\" fill(null)",
               "range": null,
               "shifts": []
             },

@@ -9,8 +9,10 @@
 #   influxdb-02  InfluxDB de DATOS de negocio
 #   kapacitor-02..05  Kapacitor de datos, conectados a influxdb-02 (sin tasks).
 #
-# Telegraf (imagen 1.39.1, última 1.39.x) observa las 7 instancias y escribe la
-# DB "telegraf" en influxdb-01. Chronograf lee de influxdb-01.
+# Telegraf: en el despliegue REAL hay uno por host (conf/telegraf-influxdb.conf y
+# conf/telegraf-kapacitor.conf, cada uno sondea su localhost con su INSTANCE_NAME).
+# Compose lo APROXIMA con UN Telegraf central (docker/telegraf.conf) que observa las
+# 7 instancias y escribe la DB "telegraf" en influxdb-01. Chronograf lee de influxdb-01.
 #
 #   docker compose up -d
 #
@@ -159,6 +161,12 @@ services:
         condition: service_healthy
       kapacitor-01:
         condition: service_started
+    environment:
+      # Despliegue real = un Telegraf por host (conf/telegraf-{influxdb,kapacitor}.conf,
+      # cada uno con su INSTANCE_NAME). Compose lo aproxima con UN Telegraf central:
+      # atribuye las métricas de host a influxdb-01 (los bloques por-URL conservan
+      # su propio tag "instance"; ver docker/telegraf.conf).
+      INSTANCE_NAME: influxdb-01
     volumes:
       - ./docker/telegraf.conf:/etc/telegraf/telegraf.conf:ro
 

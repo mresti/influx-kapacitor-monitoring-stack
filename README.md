@@ -11,9 +11,12 @@ propuestas adicionales** (ver secciones finales) y una topología real de
 ```
 influx-obs/
 ├── conf/
-│   ├── influxdb.conf        # [monitor], /debug/vars, /metrics, flux, hardening
-│   ├── kapacitor.conf       # /debug/vars, [stats], suscripciones, hardening
-│   └── telegraf.conf        # inputs TICK + host + prometheus + starlark "up"
+│   ├── influxdb.conf              # [monitor], /debug/vars, /metrics, flux, hardening
+│   ├── kapacitor.conf            # /debug/vars, [stats], suscripciones, hardening
+│   ├── telegraf-influxdb.conf    # conf per-host rol InfluxDB (sondea localhost + host + starlark "up")
+│   └── telegraf-kapacitor.conf   # conf per-host rol Kapacitor (sondea localhost + host + starlark "up")
+├── scripts/
+│   └── validate-dashboards.py    # validador estático de dashboards (stdlib, sin red)
 ├── setup/
 │   └── sla_retention_and_cq.influxql   # RP sla_long + Continuous Queries (#3,#4)
 ├── tick/                    # alertas como código (#2,#4,#7 + 6 propuestas)
@@ -34,7 +37,7 @@ influx-obs/
 │   └── 05-capacity-stats.json
 ├── docker-compose.yml       # stack completo (topología real) para pruebas
 └── docker/                  # variantes/servicios de aprovisionamiento (compose)
-    ├── telegraf.conf        # variante compose (urls a los servicios)
+    ├── telegraf.conf        # variante compose (UN Telegraf central, urls a los servicios)
     ├── setup-influx.sh      # crea DB + RP + CQs + retención
     └── provision-chronograf.py  # crea source + importa/actualiza dashboards
 ```
@@ -42,24 +45,25 @@ influx-obs/
 ## Topología (instancias independientes)
 
 Caso de uso real: **el Kapacitor de alertas cuelga del InfluxDB de
-monitorización**, no del de datos.
+monitorización**, no del de datos. Y **cada host corre su propio Telegraf**
+(no un sondeo central): sondea solo su localhost y marca todas sus métricas con
+`instance = "${INSTANCE_NAME}"`; todos escriben a influxdb-01 vía
+`MONITOR_INFLUX_URL`.
 
 ```
-                 ┌──────────────┐   suscripción   ┌───────────────┐
-   DB "telegraf" │ influxdb-01  │ ───────────────►│ kapacitor-01  │  ALERTAS
-   (monitoriz.)  │ (monitoriz.) │                 │ (TICKscripts, │  topic 'infra'
-        ▲        └──────────────┘                 │  handlers)    │  → log/slack/smtp
-        │ escribe                                  └───────────────┘
-   ┌──────────┐         observa las 7 instancias
-   │ Telegraf │◄────/debug/vars, /metrics, /ping de influxdb-01/02 y kapacitor-01..05
-   └──────────┘
-        │ observa
-        ▼
-   ┌──────────────┐   suscripción   ┌───────────────────────────┐
-   │ influxdb-02  │ ───────────────►│ kapacitor-02..05 (datos)  │
-   │ (datos)      │                 └───────────────────────────┘
-   └──────────────┘
-                              Chronograf lee de influxdb-01 (dashboards)
+   Telegraf (host influxdb-01) ─instance=influxdb-01─┐
+   Telegraf (host influxdb-02) ─instance=influxdb-02─┤
+   Telegraf (host kapacitor-01)─instance=kapacitor-01┤   DB "telegraf"   ┌──────────────┐
+   Telegraf (host kapacitor-02)─instance=kapacitor-02┼─────────────────►│ influxdb-01  │
+   Telegraf (host kapacitor-…) ─instance=kapacitor-…─┘  (MONITOR_INFLUX │ (monitoriz.) │
+        cada uno sondea SU localhost                        _URL)        └──────┬───────┘
+        (/debug/vars, /metrics, /ping, host, internal)                          │ suscripción
+                                                                                 ▼
+   ┌──────────────┐   suscripción   ┌───────────────────────────┐        ┌───────────────┐
+   │ influxdb-02  │ ───────────────►│ kapacitor-02..05 (datos)  │        │ kapacitor-01  │ ALERTAS
+   │ (datos)      │                 └───────────────────────────┘        │ (TICKscripts, │ topic 'infra'
+   └──────────────┘                                                       │  handlers)    │ → log/slack/smtp
+                    Chronograf lee de influxdb-01 (dashboards)            └───────────────┘
 ```
 
 ### Selectores de instancia (`:instance:`)
@@ -79,9 +83,16 @@ aparece sola al llegar datos):
 ofrece opción "All" en tagValues, el overview muestra **siempre todas las
 instancias** vía `GROUP BY "instance"`.
 
-Los paneles de measurements sin tag `instance` (host: `cpu`, `mem`, `disk`,
-`diskio`, `system`, `internal_*`; y `procstat`) no se filtran por `:instance:`:
-agrupan por `host` y muestran todo (visibilidad global).
+**Capacity (05) filtra al completo.** Con un Telegraf por host, todos los
+measurements (incluidos host `cpu`/`mem`/`disk`/`diskio`/`system`, `internal_*` y
+`procstat`) llevan el tag `instance`, así que **cada panel del 05** aplica
+`AND "instance" =~ /^:instance:$/` y agrupa por `instance`. El nombre de instancia
+debe ser `[A-Za-z0-9_-]` (se interpola en el regex de Chronograf).
+
+> Nota (cutover): las series **históricas escritas antes** de añadir el tag
+> `instance` no lo tienen, así que los paneles de host mostrarán **huecos**
+> pre-cutover al filtrar; se rellenan a partir del momento en que cada Telegraf
+> per-host empieza a emitir el tag.
 
 ## Arquitectura de datos
 
@@ -97,12 +108,26 @@ host cpu/mem/disk/proc───┘        └──► Continuous Queries ──
 
 ## Puesta en marcha
 
-1. Copia los `.conf` a `/etc/influxdb`, `/etc/kapacitor`, `/etc/telegraf` y
-   ajusta URLs/credenciales. El tag `instance` (añadido en `[inputs.influxdb.tags]`
-   y `[inputs.kapacitor.tags]`) distingue cada instancia en los dashboards. Para
-   varias instancias **duplica el bloque input** por instancia, cada uno con su
-   url y su tag `instance` (un solo bloque con varias urls compartiría el tag).
-2. Reinicia `influxd`, `kapacitord`, `telegraf`.
+1. **Un Telegraf por host.** Copia `conf/influxdb.conf`/`conf/kapacitor.conf` a
+   sus hosts. En cada host, copia el `telegraf-*.conf` **de su rol** a
+   `/etc/telegraf/telegraf.conf` (rol InfluxDB → `telegraf-influxdb.conf`; rol
+   Kapacitor → `telegraf-kapacitor.conf`); sondean solo su localhost. El tag
+   `instance` y la URL de salida vienen de **dos env vars** (`INSTANCE_NAME`,
+   `MONITOR_INFLUX_URL`), no del `.conf`. Con systemd, un `EnvironmentFile` por
+   host (charset de `INSTANCE_NAME`: solo `[A-Za-z0-9_-]`):
+
+   ```ini
+   # /etc/telegraf/telegraf.env  (referenciado desde el unit con EnvironmentFile=)
+   INSTANCE_NAME=influxdb-01
+   MONITOR_INFLUX_URL=http://influxdb-01:8086
+   ```
+
+   ```ini
+   # override del unit:  systemctl edit telegraf
+   [Service]
+   EnvironmentFile=/etc/telegraf/telegraf.env
+   ```
+2. Reinicia `influxd`, `kapacitord`, `telegraf` (`systemctl restart telegraf`).
 3. Crea RP y Continuous Queries (una vez):
    `influx -database telegraf -import -path setup/sla_retention_and_cq.influxql -precision ns`
 4. Despliega las alertas: copia `tick/*.tick` a `/etc/kapacitor/load/tasks/` (el
@@ -166,17 +191,22 @@ Se aprovisiona solo (servicios one-shot, ambos contra influxdb-01):
 
 Detalles:
 
-- Telegraf usa `docker/telegraf.conf` (variante con urls a los servicios de la
-  red de compose); el canónico es `conf/telegraf.conf`. Pin `telegraf:1.39.1`
-  (última 1.39.x).
+- Telegraf usa `docker/telegraf.conf`: **UN Telegraf central** que sondea todos
+  los servicios por HTTP (aproximación del modelo real per-host, cuyos canónicos
+  son `conf/telegraf-influxdb.conf` + `conf/telegraf-kapacitor.conf`). Pin
+  `telegraf:1.39.1` (última 1.39.x).
 - **Solo `kapacitor-01`** (alertas) monta `./tick` en `/etc/kapacitor/load/tasks/`
   y `./tick/handlers` en `/etc/kapacitor/load/handlers/` (el `[load]` escanea esos
   subdirectorios). `kapacitor-02..05` arrancan con `KAPACITOR_LOAD_ENABLED=false`.
 - **Limitaciones conocidas en local:** (1) sin `inputs.procstat`
   (`influxd`/`kapacitord` en contenedores aparte) → paneles de **uptime de
   proceso, RSS y FDs** vacíos; (2) `inputs.tail` de queries lentas no activo
-  (influxd loguea a stdout) → panel **"Queries lentas/min"** vacío. Ambos
-  funcionan en un despliegue real donde Telegraf corre junto a los procesos/logs.
+  (influxd loguea a stdout) → panel **"Queries lentas/min"** vacío; (3) el
+  Telegraf central atribuye **todas** las métricas de host e `internal_*` a
+  `instance=influxdb-01`, así que al filtrar el dashboard 05 por otra instancia
+  los **paneles de host salen vacíos** (los paneles TICK por-URL sí cambian).
+  Los tres funcionan en un despliegue real (un Telegraf por host, junto a los
+  procesos/logs).
 
 ```bash
 docker compose down -v    # parar y borrar volúmenes
@@ -190,7 +220,12 @@ docker compose down -v    # parar y borrar volúmenes
 | 2 | `02-influx-deep.json` | Memoria/GC, HTTP, write/query engine, TSM/WAL, **percentiles de latencia y de pausa GC**. Filtro por instancia (`:instance:`). |
 | 3 | `03-kapacitor-deep.json` | Tareas, edges, ingress, nodos, alertas por nivel, cardinalidad, memoria. Filtro por instancia (`:instance:`). |
 | 4 | `04-sla-stats.json` | SLA (%) por servicio/instancia, error budget, **SLI de ingesta**, **histórico diario desde CQ**. |
-| 5 | `05-capacity-stats.json` | Cardinalidad por DB, **gauge de uso vs límite de series**, disco, RAM/CPU/FDs, buffer de Telegraf. |
+| 5 | `05-capacity-stats.json` | Cardinalidad por DB, **gauge de uso vs límite de series**, disco, RAM/CPU/FDs, diskio, buffer de Telegraf. **Filtrable al completo por instancia** (`:instance:`): host + TICK + `internal_*` (requiere Telegraf per-host; en compose los paneles host solo tienen `influxdb-01`). |
+
+Validación estática (sin red, stdlib) antes de importar: `python3 scripts/validate-dashboards.py`
+comprueba que los JSON parsean, que `queryConfig.rawText` == `query` (evita editar
+uno y olvidar el otro) y que el dashboard 05 filtra por `:instance:` en todas sus
+queries (WARN informativo para 02/03/04).
 
 ## Notas de métricas
 
