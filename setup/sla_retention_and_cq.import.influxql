@@ -1,0 +1,23 @@
+# =============================================================================
+# Variante en formato `influx -import` de sla_retention_and_cq.influxql.
+# Requisitos del formato import: comentarios con '#', seccion '# DDL' con UNA
+# sentencia por linea (las CQ van aplanadas) y seccion '# DML' (aqui vacia:
+# no se escriben puntos, por eso tampoco hace falta -precision).
+#
+# Ejecutar (idempotente; los "already exists" se registran pero no abortan):
+#   influx -host <host-influxdb-01> -import -path setup/sla_retention_and_cq.import.influxql
+#
+# Si cambias sentencias aqui, replica el cambio en sla_retention_and_cq.influxql
+# (el que aplica docker/setup-influx.sh) y viceversa.
+# =============================================================================
+# DDL
+CREATE DATABASE telegraf
+CREATE RETENTION POLICY "sla_long" ON "telegraf" DURATION 400d REPLICATION 1
+ALTER RETENTION POLICY "monitor" ON "_internal" DURATION 168h REPLICATION 1 DEFAULT
+# (Opcional) acotar los datos crudos de telegraf; descomenta y ajusta:
+# ALTER RETENTION POLICY "autogen" ON "telegraf" DURATION 30d REPLICATION 1 DEFAULT
+CREATE CONTINUOUS QUERY "cq_sla_hourly" ON "telegraf" BEGIN SELECT mean("up") * 100 AS "availability" INTO "telegraf"."sla_long"."sla_hourly" FROM "telegraf"."autogen"."http_response" GROUP BY time(1h), "service", "instance" END
+CREATE CONTINUOUS QUERY "cq_sla_daily" ON "telegraf" BEGIN SELECT mean("availability") AS "availability" INTO "telegraf"."sla_long"."sla_daily" FROM "telegraf"."sla_long"."sla_hourly" GROUP BY time(1d), "service", "instance" END
+CREATE CONTINUOUS QUERY "cq_cardinality_hourly" ON "telegraf" BEGIN SELECT max("numSeries") AS "numSeries", max("numMeasurements") AS "numMeasurements" INTO "telegraf"."sla_long"."cardinality_hourly" FROM "telegraf"."autogen"."influxdb_database" GROUP BY time(1h), "database", "instance" END
+# DML
+# CONTEXT-DATABASE: telegraf

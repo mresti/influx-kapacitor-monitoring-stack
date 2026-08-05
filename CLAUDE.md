@@ -45,7 +45,7 @@ SLA: `processors.starlark` en Telegraf genera el campo `up` (1/0) desde `http_re
 - **Variables `:instance:` de dashboards**: 02/03/04/05 usan tipo tagValues (dinámico; descubren instancias solas): 02 desde `influxdb_httpd`, 03 desde `kapacitor`, 04/05 desde `http_response` (cubre las 7 instancias). Chronograf no ofrece opción "All" en tagValues, por eso el dashboard 01 (overview) no tiene variable ni filtro `instance` y muestra siempre todas vía `GROUP BY "instance"`.
 - **Memstats en snake_case** (`heap_inuse`, `pause_total_ns`…): formato de Telegraf ≥1.39. Telegraf antiguos emiten CamelCase; afecta a queries del dashboard 02.
 - `kapacitor_alert` no existe en Telegraf 1.39; los eventos por topic se miden con `kapacitor_topics.collected`.
-- `setup/sla_retention_and_cq.influxql` no es formato `influx -import` estándar: `docker/setup-influx.sh` lo trocea por `;` y ejecuta sentencia a sentencia (idempotente, tolera "ya existe").
+- `setup/sla_retention_and_cq.influxql` no es formato `influx -import` estándar: `docker/setup-influx.sh` lo trocea por `;` y ejecuta sentencia a sentencia (idempotente, tolera "ya existe"). Para aplicación manual con `-import` existe `setup/sla_retention_and_cq.import.influxql` (formato import: `# DDL`, una sentencia por línea); cambios de sentencias → mantener **ambos** en sync.
 - Secretos por env (p. ej. `KAPACITOR_SLACK_0_URL`), nunca en los `.conf`; bloques auth/TLS comentados a propósito (hardening para producción).
 
 ## Limitaciones conocidas en compose

@@ -1,8 +1,11 @@
 -- =============================================================================
 -- MEJORA #3 y #4: Retention Policy dedicada + Continuous Queries para SLA y
--- capacidad. Ejecutar una vez con:
---   influx -database telegraf -import -path sla_retention_and_cq.influxql -precision ns
--- o pegando línea a línea en el CLI:  influx
+-- capacidad. OJO: este fichero NO vale para `influx -import` (usa comentarios
+-- `--` y CQs multi-línea; el importer exige `#` y una sentencia por línea).
+-- Lo aplica docker/setup-influx.sh sentencia a sentencia. Para ejecutarlo a
+-- mano usa la variante sla_retention_and_cq.import.influxql:
+--   influx -host <host-influxdb-01> -import -path setup/sla_retention_and_cq.import.influxql
+-- Si cambias sentencias aquí, replica el cambio en la variante .import.
 -- =============================================================================
 
 -- RP de larga duración para datos pre-agregados (informes mensuales/anuales)

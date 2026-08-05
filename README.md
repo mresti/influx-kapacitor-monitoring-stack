@@ -18,7 +18,8 @@ influx-obs/
 ├── scripts/
 │   └── validate-dashboards.py    # validador estático de dashboards (stdlib, sin red)
 ├── setup/
-│   └── sla_retention_and_cq.influxql   # RP sla_long + Continuous Queries (#3,#4)
+│   ├── sla_retention_and_cq.influxql          # RP sla_long + CQs (#3,#4); lo aplica docker/setup-influx.sh
+│   └── sla_retention_and_cq.import.influxql   # variante formato `influx -import` (aplicación manual)
 ├── tick/                    # alertas como código (#2,#4,#7 + 6 propuestas)
 │   ├── 00_ingest_errors.tick
 │   ├── 01_cardinality.tick
@@ -129,7 +130,9 @@ host cpu/mem/disk/proc───┘        └──► Continuous Queries ──
    ```
 2. Reinicia `influxd`, `kapacitord`, `telegraf` (`systemctl restart telegraf`).
 3. Crea RP y Continuous Queries (una vez):
-   `influx -database telegraf -import -path setup/sla_retention_and_cq.influxql -precision ns`
+   `influx -host <host-influxdb-01> -import -path setup/sla_retention_and_cq.import.influxql`
+   (ver «RP y Continuous Queries por comando» más abajo; el `.influxql` sin
+   `.import` **no** vale para `-import`).
 4. Despliega las alertas: copia `tick/*.tick` a `/etc/kapacitor/load/tasks/` (el
    `[load]` de `kapacitor.conf` escanea el subdirectorio `tasks/`) y reinicia
    Kapacitor, o cárgalas con `kapacitor define ... -tick ...`. Comprueba con
@@ -162,6 +165,42 @@ Método manual (alternativa a `docker compose up chronograf-provision`).
 reimportar, **borra antes el antiguo** o tendrás duplicados. El script
 `docker compose up chronograf-provision` **sí** deduplica (PUT por nombre) y es el
 método preferido.
+
+## RP y Continuous Queries por comando (sin `docker/setup-influx.sh`)
+
+`influx -import` **falla** con `setup/sla_retention_and_cq.influxql`: el importer
+de InfluxDB 1.x exige secciones `# DDL`/`# DML`, comentarios con `#` (no `--`) y
+**una sentencia por línea**, y ese fichero usa comentarios `--` y CQs
+multi-línea (por eso `docker/setup-influx.sh` lo trocea y lanza cada sentencia
+con `-execute`). Para aplicarlo a mano usa la variante ya adaptada
+`setup/sla_retention_and_cq.import.influxql`:
+
+```bash
+# Despliegue real (CLI influx 1.x contra el InfluxDB de monitorización)
+influx -host <host-influxdb-01> -port 8086 -import -path setup/sla_retention_and_cq.import.influxql
+```
+
+```bash
+# Stack de compose (reutiliza el contenedor influx-setup, que monta ./setup)
+docker compose run --rm --entrypoint influx influx-setup \
+  -host influxdb-01 -import -path /setup/sla_retention_and_cq.import.influxql
+```
+
+Notas:
+
+- No hace falta `-database` ni `-precision`: todas las sentencias van
+  cualificadas y la sección `# DML` está vacía (no escribe puntos).
+- Incluye `CREATE DATABASE telegraf`, así que no hay que crear la DB antes.
+- **Idempotente en la práctica:** al re-ejecutar, los «already exists» se
+  registran como error pero el importer **no aborta** y aplica el resto.
+- Verificación:
+
+  ```bash
+  influx -host <host-influxdb-01> -execute 'SHOW RETENTION POLICIES ON telegraf'
+  influx -host <host-influxdb-01> -execute 'SHOW CONTINUOUS QUERIES' -database telegraf
+  ```
+- Si cambias sentencias, mantén en sync los **dos** ficheros de `setup/` (el
+  `.influxql` del script y la variante `.import.influxql`).
 
 ## Prueba local con Docker Compose
 
