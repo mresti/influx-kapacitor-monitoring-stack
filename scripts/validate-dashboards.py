@@ -4,7 +4,10 @@
 Comprueba invariantes que rompen dashboards silenciosamente:
 - JSON parseable con `dashboard.name` y `dashboard.cells`.
 - Coherencia `queryConfig.rawText` == `query` (el bug de editar uno y olvidar el otro).
-- STRICT en 05: template tagValues `:instance:` y filtro de instancia en TODA query influxql.
+- Comillas manuales alrededor de una template var (`':instance:'`): Chronograf ya
+  entrecomilla el valor fuera de los regex, asi que quedaria `''valor''` y rompe
+  el panel o el dropdown en el navegador, sin error visible en el JSON.
+- STRICT en 05: template dinamica `:instance:` y filtro de instancia en TODA query influxql.
 - WARN en 02/03/04: queries influxql sin filtro de instancia (candidatas a follow-up).
 
 Salida en español, exit 0 si no hay errores, 1 si los hay.
@@ -13,11 +16,18 @@ Salida en español, exit 0 si no hay errores, 1 si los hay.
 import glob
 import json
 import os
+import re
 import sys
 
 DASHBOARDS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dashboards")
 INSTANCE_FILTER = '"instance" =~ /^:instance:$/'
 INSTANCE_TEMPLATE = ":instance:"
+# "influxql" = meta query personalizada (permite encadenar variables, como el
+# :task: del 06). Vale igual que tagValues como origen dinamico de valores.
+INSTANCE_TEMPLATE_TYPES = ("tagValues", "influxql")
+# Chronograf entrecomilla solo el valor de las tagValues fuera de los regex, asi
+# que ':var:' escrito a mano acaba como ''valor'' -> InfluxQL invalido.
+MANUAL_QUOTING_PATTERN = re.compile(r"'(:[\w-]+:)'")
 STRICT_PREFIX = "05"
 WARN_PREFIXES = ("02", "03", "04")
 
@@ -59,7 +69,7 @@ def iter_queries(dashboard):
 
 def has_instance_template(dashboard):
     return any(
-        template.get("type") == "tagValues" and template.get("tempVar") == INSTANCE_TEMPLATE
+        template.get("type") in INSTANCE_TEMPLATE_TYPES and template.get("tempVar") == INSTANCE_TEMPLATE
         for template in dashboard.get("templates", [])
     )
 
@@ -76,6 +86,28 @@ def check_rawtext_matches_query(filename, dashboard, report):
         raw_text = query.get("queryConfig", {}).get("rawText")
         if raw_text is not None and raw_text != query.get("query"):
             report.fail(filename, f"query #{index}: rawText != query (edición desincronizada)")
+
+
+def iter_statements(dashboard):
+    """Todo el InfluxQL del dashboard: queries de celda y meta queries de las
+    template vars (estas ultimas rompen el dropdown sin dar error visible)."""
+    for cell in dashboard.get("cells", []):
+        for index, query in enumerate(cell.get("queries", [])):
+            yield f"celda '{cell.get('name')}' q{index}", query.get("query") or ""
+    for template in dashboard.get("templates", []):
+        statement = (template.get("query") or {}).get("influxql")
+        if statement:
+            yield f"template {template.get('tempVar')}", statement
+
+
+def check_manual_quoting(filename, dashboard, report):
+    for location, statement in iter_statements(dashboard):
+        for variable in MANUAL_QUOTING_PATTERN.findall(statement):
+            report.fail(
+                filename,
+                f"{location}: {variable} entre comillas manuales; Chronograf ya las "
+                f"anade fuera de regex y quedaria ''valor''. Usa =~ /^{variable}$/",
+            )
 
 
 def influxql_queries_without_filter(dashboard):
@@ -109,6 +141,7 @@ def validate_dashboard(path, report):
         return
     check_structure(filename, dashboard, report)
     check_rawtext_matches_query(filename, dashboard, report)
+    check_manual_quoting(filename, dashboard, report)
     if filename.startswith(STRICT_PREFIX):
         check_strict_instance_filter(filename, dashboard, report)
     elif filename.startswith(WARN_PREFIXES):

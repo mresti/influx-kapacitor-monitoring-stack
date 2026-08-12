@@ -426,7 +426,7 @@
         "name": "Latencia media de escritura (ms/req)",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"writeReqDurationNs\"),1s) / non_negative_derivative(max(\"writeReq\"),1s) / 1e6 AS \"ms/req\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"writeReqDurationNs\"),1s) / non_negative_derivative(max(\"writeReq\"),1s) / 1000000 AS \"ms/req\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -438,7 +438,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"writeReqDurationNs\"),1s) / non_negative_derivative(max(\"writeReq\"),1s) / 1e6 AS \"ms/req\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"writeReqDurationNs\"),1s) / non_negative_derivative(max(\"writeReq\"),1s) / 1000000 AS \"ms/req\" FROM \"telegraf\".\"autogen\".\"influxdb_httpd\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1268,7 +1268,7 @@
         "name": "Duración media de query (ms)",
         "queries": [
           {
-            "query": "SELECT non_negative_derivative(max(\"queryDurationNs\"),1s) / non_negative_derivative(max(\"queriesExecuted\"),1s) / 1e6 AS \"ms/query\" FROM \"telegraf\".\"autogen\".\"influxdb_queryExecutor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"queryDurationNs\"),1s) / non_negative_derivative(max(\"queriesExecuted\"),1s) / 1000000 AS \"ms/query\" FROM \"telegraf\".\"autogen\".\"influxdb_queryExecutor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1280,7 +1280,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"queryDurationNs\"),1s) / non_negative_derivative(max(\"queriesExecuted\"),1s) / 1e6 AS \"ms/query\" FROM \"telegraf\".\"autogen\".\"influxdb_queryExecutor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"queryDurationNs\"),1s) / non_negative_derivative(max(\"queriesExecuted\"),1s) / 1000000 AS \"ms/query\" FROM \"telegraf\".\"autogen\".\"influxdb_queryExecutor\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1542,7 +1542,7 @@
             "type": "influxql"
           },
           {
-            "query": "SELECT non_negative_derivative(max(\"writeError\"), 1s) AS \"writeError/s\" FROM \"telegraf\".\"autogen\".\"influxdb_tsm1_wal\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+            "query": "SELECT non_negative_derivative(max(\"writeErr\"), 1s) AS \"writeError/s\" FROM \"telegraf\".\"autogen\".\"influxdb_tsm1_wal\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
             "queryConfig": {
               "database": "telegraf",
               "measurement": "",
@@ -1554,7 +1554,7 @@
                 "tags": []
               },
               "areaTags": [],
-              "rawText": "SELECT non_negative_derivative(max(\"writeError\"), 1s) AS \"writeError/s\" FROM \"telegraf\".\"autogen\".\"influxdb_tsm1_wal\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
+              "rawText": "SELECT non_negative_derivative(max(\"writeErr\"), 1s) AS \"writeError/s\" FROM \"telegraf\".\"autogen\".\"influxdb_tsm1_wal\" WHERE time > :dashboardTime: AND time < :upperDashboardTime: AND \"instance\" =~ /^:instance:$/ GROUP BY time(:interval:), \"instance\" fill(null)",
               "range": null,
               "shifts": []
             },
@@ -1647,7 +1647,7 @@
           "isEnforced": false,
           "digits": 2
         },
-        "note": "",
+        "note": "En influxdb_tsm1_wal el field es writeErr; writeError pertenece a influxdb_write (otro measurement).",
         "noteVisibility": "default"
       },
       {
