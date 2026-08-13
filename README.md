@@ -14,9 +14,12 @@ influx-obs/
 │   ├── influxdb.conf              # [monitor], /debug/vars, /metrics, flux, hardening
 │   ├── kapacitor.conf            # /debug/vars, [stats], suscripciones, hardening
 │   ├── telegraf-influxdb.conf    # conf per-host rol InfluxDB (sondea localhost + host + starlark "up")
-│   └── telegraf-kapacitor.conf   # conf per-host rol Kapacitor (sondea localhost + host + starlark "up")
+│   └── telegraf-kapacitor.conf   # conf per-host rol Kapacitor (localhost + host + starlark "up" + API alertas)
+├── docs/
+│   └── runbook-topic-critical.md    # runbook: topic en CRITICAL en la tabla API del dashboard 03
 ├── scripts/
-│   └── validate-dashboards.py    # validador estático de dashboards (stdlib, sin red)
+│   ├── validate-dashboards.py       # validador estático de dashboards (stdlib, sin red)
+│   └── validate-dashboards-live.py  # validador EN VIVO (ejecuta queries contra influxdb-01)
 ├── setup/
 │   ├── sla_retention_and_cq.influxql          # RP sla_long + CQs (#3,#4); lo aplica docker/setup-influx.sh
 │   └── sla_retention_and_cq.import.influxql   # variante formato `influx -import` (aplicación manual)
@@ -35,7 +38,8 @@ influx-obs/
 │   ├── 02-influx-deep.json
 │   ├── 03-kapacitor-deep.json
 │   ├── 04-sla-stats.json
-│   └── 05-capacity-stats.json
+│   ├── 05-capacity-stats.json
+│   └── 06-kapacitor-task-deep.json
 ├── docker-compose.yml       # stack completo (topología real) para pruebas
 └── docker/                  # variantes/servicios de aprovisionamiento (compose)
     ├── telegraf.conf        # variante compose (UN Telegraf central, urls a los servicios)
@@ -79,6 +83,14 @@ aparece sola al llegar datos):
 - **Kapacitor Deep (03):** desde `kapacitor`.
 - **SLA / Capacity (04, 05):** desde `http_response` (única medida con el tag
   `instance` de las 7 instancias: influx + kapacitor).
+- **Kapacitor Task Deep (06):** desde `kapacitor`, más una segunda variable
+  `:task:` de tipo **influxql** (meta query personalizada; tagValues no permite
+  referenciar otras vars) **encadenada** a `:instance:`:
+  `SHOW TAG VALUES ... WITH KEY = "task" WHERE "instance" =~ /^:instance:$/`,
+  para que el desplegable de tasks se filtre por la instancia elegida. La forma
+  regex no es opcional: escribir `= ':instance:'` produce doble entrecomillado
+  (`''valor''`) al interpolar Chronograf → query inválida sin error visible en
+  el JSON (lo cazan ambos validadores).
 
 **Health (01):** no tiene variable ni filtro `instance`. Como Chronograf no
 ofrece opción "All" en tagValues, el overview muestra **siempre todas las
@@ -225,7 +237,7 @@ Se aprovisiona solo (servicios one-shot, ambos contra influxdb-01):
 - **influx-setup** — crea la DB `telegraf`, la RP `sla_long`, las Continuous
   Queries y la retención (`monitor` de `_internal` a 7d) de
   `setup/sla_retention_and_cq.influxql`.
-- **chronograf-provision** — crea el source e **importa/actualiza** los 5
+- **chronograf-provision** — crea el source e **importa/actualiza** los 6
   dashboards (idempotente-actualizante: en un segundo `up` hace PUT, no duplica).
 
 Detalles:
@@ -245,26 +257,46 @@ Detalles:
   `instance=influxdb-01`, así que al filtrar el dashboard 05 por otra instancia
   los **paneles de host salen vacíos** (los paneles TICK por-URL sí cambian).
   Los tres funcionan en un despliegue real (un Telegraf por host, junto a los
-  procesos/logs).
+  procesos/logs); (4) los `[[inputs.http]]` que scrapean la **API de alertas**
+  (`/kapacitor/v1/alerts/topics` y `.../topics/infra/handlers` →
+  `kapacitor_topics_api`/`kapacitor_handlers`) están definidos solo contra
+  kapacitor-01 (el único que carga TICKscripts), así que las tablas "Nivel
+  actual por topic" y "Handlers del topic infra" del 03 salen vacías al elegir
+  otra instancia. En despliegue real `conf/telegraf-kapacitor.conf` los lleva
+  activos en todos los hosts: los endpoints devuelven 200 con listas vacías (no
+  404) y con `optional = true` no generan ni error ni puntos.
 
 ```bash
 docker compose down -v    # parar y borrar volúmenes
 ```
 
-## Los 5 dashboards
+## Los 6 dashboards
 
 | # | Fichero | Qué responde |
 |---|---------|--------------|
 | 1 | `01-health.json` | Disponibilidad, **uptime de proceso y host**, latencia `/ping`, errores de ingesta, queries, errores en nodos de Kapacitor, throughput. |
 | 2 | `02-influx-deep.json` | Memoria/GC, HTTP, write/query engine, TSM/WAL, **percentiles de latencia y de pausa GC**. Filtro por instancia (`:instance:`). |
-| 3 | `03-kapacitor-deep.json` | Tareas, edges, ingress, nodos, alertas por nivel, cardinalidad, memoria. Filtro por instancia (`:instance:`). |
+| 3 | `03-kapacitor-deep.json` | Tareas, edges, ingress, nodos, alertas por nivel, cardinalidad por task, memoria, errores del load dir y **tablas desde la API de alertas** (nivel actual por topic, handlers del topic `infra`). Filtro por instancia (`:instance:`). |
 | 4 | `04-sla-stats.json` | SLA (%) por servicio/instancia, error budget, **SLI de ingesta**, **histórico diario desde CQ**. |
 | 5 | `05-capacity-stats.json` | Cardinalidad por DB, **gauge de uso vs límite de series**, disco, RAM/CPU/FDs, diskio, buffer de Telegraf. **Filtrable al completo por instancia** (`:instance:`): host + TICK + `internal_*` (requiere Telegraf per-host; en compose los paneles host solo tienen `influxdb-01`). |
+| 6 | `06-kapacitor-task-deep.json` | Deep-dive de **una task concreta**: errores acumulados y por nodo, cardinalidad de trabajo (total y por nodo), edges por arista, tiempo medio de ejecución por nodo, alertas por nivel e inhibidas, eventos del topic. Doble filtro `:instance:` + `:task:` (encadenado). |
 
-Validación estática (sin red, stdlib) antes de importar: `python3 scripts/validate-dashboards.py`
-comprueba que los JSON parsean, que `queryConfig.rawText` == `query` (evita editar
-uno y olvidar el otro) y que el dashboard 05 filtra por `:instance:` en todas sus
-queries (WARN informativo para 02/03/04).
+Validación (antes de importar):
+
+- **Estática** (sin red, stdlib): `python3 scripts/validate-dashboards.py`
+  comprueba que los JSON parsean, que `queryConfig.rawText` == `query` (evita
+  editar uno y olvidar el otro), que ninguna template var lleva **comillas
+  manuales** (`':instance:'` → doble entrecomillado al interpolar) y que el
+  dashboard 05 filtra por `:instance:` en todas sus queries (WARN informativo
+  para 02/03/04).
+- **En vivo** (stack levantado): `python3 scripts/validate-dashboards-live.py`
+  ejecuta cada query contra influxdb-01 con las template vars sustituidas por
+  valores reales. Detecta lo que la estática no ve: InfluxQL inválido (p. ej.
+  notación científica `/1e6` → `invalid duration` en InfluxDB 1.8), field
+  inexistente (0 series, panel vacío para siempre) y tag inexistente en
+  `GROUP BY` (una serie con tag vacío, línea plana engañosa). Los measurements
+  ausentes por limitación de compose se reportan como SKIP. Flags:
+  `--instance kapacitor-02 --task 01_cardinality --start 'now() - 6h'`.
 
 ## Notas de métricas
 
@@ -281,6 +313,14 @@ queries (WARN informativo para 02/03/04).
   `influxdb`/`kapacitor`, y los dashboards/CQs/alertas filtran por `service`.
 - El campo `up` (1/0) lo genera `processors.starlark` en Telegraf a partir de
   `http_response.result_code`. Es la base del SLA y de la alerta de disponibilidad.
+- **API de alertas de Kapacitor** (no expuesta en `/debug/vars`): dos
+  `[[inputs.http]]` con `json_v2` scrapean `/kapacitor/v1/alerts/topics` →
+  `kapacitor_topics_api` y `.../topics/infra/handlers` → `kapacitor_handlers`.
+  `level` (y `kind`/`match`) van como **field string, no tag**: `level` cambia en
+  cada transición OK↔CRITICAL (churn de series) y un tag no se puede seleccionar
+  con `last()`, que es lo que usan las tablas del 03. `options` de los handlers
+  queda fuera a propósito (puede contener secretos: webhook Slack, credenciales
+  SMTP).
 
 ---
 
